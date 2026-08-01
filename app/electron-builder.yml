@@ -1,0 +1,55 @@
+appId: com.gosom.gmaps-scraper
+productName: Google Maps Scraper
+directories:
+  output: release
+  buildResources: build
+files:
+  - dist/**/*
+  - node_modules/**/*
+  - "!node_modules/playwright/.local-browsers/**/*"
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: build/icon.ico
+  extraResources:
+    - from: browsers/win-${arch}
+      to: playwright-browsers
+      filter: ["**/*"]
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  icon: build/icon.icns
+  category: public.app-category.utilities
+  extraResources:
+    - from: browsers/mac-${arch}
+      to: playwright-browsers
+      filter: ["**/*"]
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+  icon: build/icon.png
+  category: Utility
+  extraResources:
+    - from: browsers/linux-${arch}
+      to: playwright-browsers
+      filter: ["**/*"]
+dmg:
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications

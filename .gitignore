@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+release/
+
+# Bundled browsers (large binaries, downloaded at build time)
+browsers/
+
+# Generated build-time config (contains secrets)
+app/src/main/build-config.ts
+
+# Environment / secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Logs
+*.log
+
+# OS / editor
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+.tmp/
+
+# Vercel
+.vercel/
+
+# Playwright browser downloads
+.local-browsers/
