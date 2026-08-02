@@ -4,6 +4,7 @@ publish:
   provider: github
   owner: userisaziz
   repo: gscrapper
+  releaseType: release
 directories:
   output: release
   buildResources: build
