@@ -323,6 +323,93 @@
 
   /* Section rhythm */
   .band-alt{background:var(--canvas-soft-2);}
+
+  /* ───────── Install help ───────── */
+  .install-notice{
+    max-width:860px;margin:0 auto;
+    background:var(--canvas-soft);
+    border:1px solid var(--hairline);
+    border-left:3px solid var(--warning,#ffa42b);
+    border-radius:var(--radius-md);
+    padding:28px 32px;
+  }
+  .install-notice-header{
+    display:flex;align-items:center;gap:12px;margin-bottom:20px;
+  }
+  .install-notice-header .shield{
+    width:36px;height:36px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(255,164,43,0.1);border:1px solid rgba(255,164,43,0.25);
+  }
+  .install-notice-header .shield svg{width:17px;height:17px;stroke:#ffa42b;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .install-notice-header h3{font-size:15px;font-weight:700;color:var(--ink-strong);}
+  .install-notice-header p{font-size:12.5px;color:var(--mute);margin-top:1px;}
+
+  .install-tabs{
+    display:flex;gap:6px;margin-bottom:20px;
+  }
+  .install-tab{
+    padding:8px 16px;border-radius:var(--radius-pill);
+    font-size:13px;font-weight:600;cursor:pointer;
+    background:var(--canvas);border:1px solid var(--hairline);
+    color:var(--body);transition:all .15s;user-select:none;
+  }
+  .install-tab:hover{border-color:#5a5654;color:var(--ink);}
+  .install-tab.active{background:var(--primary);border-color:var(--primary);color:var(--on-primary);}
+
+  .install-panel{display:none;}
+  .install-panel.active{display:block;}
+
+  .install-steps{
+    display:flex;flex-direction:column;gap:0;
+  }
+  .install-step{
+    display:flex;gap:14px;padding:12px 0;
+    border-bottom:1px solid rgba(61,58,57,0.5);
+  }
+  .install-step:last-child{border-bottom:none;}
+  .install-step .step-num{
+    width:24px;height:24px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--canvas);border:1px solid var(--hairline);
+    font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--primary-soft);
+  }
+  .install-step .step-text{font-size:13.5px;color:var(--body);line-height:1.6;padding-top:2px;}
+  .install-step .step-text strong{color:var(--ink);font-weight:600;}
+  .install-step .step-text code{
+    background:var(--canvas);padding:2px 6px;border-radius:3px;
+    font-family:var(--font-mono);font-size:11.5px;color:var(--primary-soft);
+  }
+
+  .install-cmd{
+    margin-top:16px;padding:12px 16px;
+    background:var(--canvas);border:1px solid var(--hairline);
+    border-radius:var(--radius-sm);
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    cursor:pointer;transition:border-color .15s;
+  }
+  .install-cmd:hover{border-color:#5a5654;}
+  .install-cmd code{
+    font-family:var(--font-mono);font-size:12px;color:var(--primary-soft);
+    word-break:break-all;
+  }
+  .install-cmd .copy-hint{
+    font-size:10px;color:var(--mute);white-space:nowrap;
+    text-transform:uppercase;letter-spacing:0.5px;font-weight:600;
+    opacity:0;transition:opacity .15s;
+  }
+  .install-cmd:hover .copy-hint{opacity:1;}
+  .install-cmd.copied .copy-hint{opacity:1;color:var(--primary);}
+  .install-cmd-label{
+    margin-top:14px;font-size:11.5px;color:var(--mute);
+    display:flex;align-items:center;gap:6px;
+  }
+  .install-cmd-label svg{width:12px;height:12px;stroke:var(--mute);fill:none;stroke-width:2;}
+
+  @media (max-width:640px){
+    .install-notice{padding:20px 18px;}
+    .install-tabs{flex-wrap:wrap;}
+  }
 </style>
 </head>
 <body>
@@ -336,6 +423,7 @@
       </div>
       <div class="nav-mobile-hide">
         <div class="nav-links">
+          <a href="#install">Install</a>
           <a href="#features">Features</a>
           <a href="#pricing">Pricing</a>
           <a href="#faq">FAQ</a>
@@ -381,6 +469,60 @@
       <div class="stat"><div class="num">100%</div><div class="label">Runs on-device</div></div>
     </div>
   </header>
+
+  <!-- Installation notice (right after download) -->
+  <section class="content-band" id="install" style="padding-top:0;padding-bottom:64px;">
+    <div class="install-notice">
+      <div class="install-notice-header">
+        <div class="shield"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div>
+          <h3>First launch? Your OS will show a security warning.</h3>
+          <p>MapReach is not distributed through app stores. Follow the steps below for your platform.</p>
+        </div>
+      </div>
+
+      <div class="install-tabs">
+        <div class="install-tab active" data-tab="mac">macOS</div>
+        <div class="install-tab" data-tab="win">Windows</div>
+        <div class="install-tab" data-tab="linux">Linux</div>
+      </div>
+
+      <div class="install-panel active" data-panel="mac">
+        <div class="install-steps">
+          <div class="install-step"><div class="step-num">1</div><div class="step-text">Open the <code>.dmg</code> and drag the app to <strong>Applications</strong>.</div></div>
+          <div class="install-step"><div class="step-num">2</div><div class="step-text">When you see <em>"Apple could not verify…"</em>, click <strong>Cancel</strong>.</div></div>
+          <div class="install-step"><div class="step-num">3</div><div class="step-text">Go to <strong>System Settings → Privacy &amp; Security</strong>.</div></div>
+          <div class="install-step"><div class="step-num">4</div><div class="step-text">Scroll down and click <strong>"Open Anyway"</strong>, then confirm with <strong>Open</strong>.</div></div>
+        </div>
+        <div class="install-cmd-label"><svg viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>Or copy &amp; run in Terminal (fastest):</div>
+        <div class="install-cmd" data-copy>
+          <code>xattr -cr /Applications/Google\ Maps\ Scraper.app</code>
+          <span class="copy-hint">copy</span>
+        </div>
+      </div>
+
+      <div class="install-panel" data-panel="win">
+        <div class="install-steps">
+          <div class="install-step"><div class="step-num">1</div><div class="step-text">Run the <code>.exe</code> installer.</div></div>
+          <div class="install-step"><div class="step-num">2</div><div class="step-text">When SmartScreen shows <em>"Windows protected your PC"</em>, click <strong>"More info"</strong>.</div></div>
+          <div class="install-step"><div class="step-num">3</div><div class="step-text">Click <strong>"Run anyway"</strong> at the bottom.</div></div>
+          <div class="install-step"><div class="step-num">4</div><div class="step-text">Proceed with installation as normal.</div></div>
+        </div>
+      </div>
+
+      <div class="install-panel" data-panel="linux">
+        <div class="install-steps">
+          <div class="install-step"><div class="step-num">1</div><div class="step-text">Make the AppImage executable, then run it.</div></div>
+          <div class="install-step"><div class="step-num">2</div><div class="step-text">If blocked: right-click → Properties → Permissions → check <strong>"Allow executing as program"</strong>.</div></div>
+        </div>
+        <div class="install-cmd-label"><svg viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>Copy &amp; run in terminal:</div>
+        <div class="install-cmd" data-copy>
+          <code>chmod +x Google-Maps-Scraper-*.AppImage &amp;&amp; ./Google-Maps-Scraper-*.AppImage</code>
+          <span class="copy-hint">copy</span>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Terminal signature moment -->
   <section class="content-band">
@@ -598,6 +740,38 @@
     setTimeout(addRow, 480);
   }
   setTimeout(addRow, 600);
+
+  // Install tabs
+  document.querySelectorAll('.install-tab').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      document.querySelectorAll('.install-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.install-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelector('[data-panel="' + tab.dataset.tab + '"]').classList.add('active');
+    });
+  });
+
+  // Auto-select tab based on detected OS
+  var osTab = isMac ? 'mac' : isWin ? 'win' : isLinux ? 'linux' : 'mac';
+  document.querySelectorAll('.install-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.install-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector('.install-tab[data-tab="' + osTab + '"]').classList.add('active');
+  document.querySelector('[data-panel="' + osTab + '"]').classList.add('active');
+
+  // Click-to-copy for command blocks
+  document.querySelectorAll('[data-copy]').forEach(function(el){
+    el.addEventListener('click', function(){
+      var code = el.querySelector('code').textContent;
+      navigator.clipboard.writeText(code).then(function(){
+        el.classList.add('copied');
+        el.querySelector('.copy-hint').textContent = 'copied!';
+        setTimeout(function(){
+          el.classList.remove('copied');
+          el.querySelector('.copy-hint').textContent = 'copy';
+        }, 1500);
+      });
+    });
+  });
 })();
 </script>
 </body>

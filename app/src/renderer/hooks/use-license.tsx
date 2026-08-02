@@ -26,6 +26,21 @@ export function LicenseProvider({ children }: { children: ReactNode }) {
 
   // Check license on startup
   useEffect(() => {
+    // Dev-only bypass: when running in a plain browser (no Electron preload
+    // bridge), skip auth so the UI can be previewed via `npx vite`.
+    if (import.meta.env.DEV && !(window as any).api) {
+      setState({
+        status: "authenticated",
+        license: {
+          valid: true,
+          email: "dev@localhost",
+          plan: "dev",
+          expires_at: "2099-12-31",
+          days_left: 9999,
+        },
+      });
+      return;
+    }
     let cancelled = false;
     api
       .checkLicense()

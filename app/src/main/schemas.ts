@@ -17,7 +17,7 @@ export const ScrapeStartSchema = z.object({
   email: z.boolean().default(false),
   fast_mode: z.boolean().default(false),
   radius: z.number().min(100).max(500_000).default(10_000),
-  max_time: z.string().regex(/^\d+(m|s|h)$/, "Format: <number><m|s|h>").default("10m"),
+  max_time: z.string().regex(/^\d+(m|s|h)$/, "Format: <number><m|s|h>").default("15m"),
   proxies: z.string().max(50_000).default(""),
   delay: z.number().min(0).max(300).default(0),
   strategy: z.enum(["quick", "standard", "detailed", "deep"]).default("standard"),

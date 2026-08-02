@@ -462,18 +462,23 @@ export class ScraperEngine {
       jobId: string; deadline: number; abortController: AbortController;
     }
   ): Promise<Entry[]> {
-    const MAX_CELLS = 300;        // base grid cap (bounds runtime for huge radii)
-    const MAX_SEARCHES = 1200;    // total search budget across both phases
+    const MAX_CELLS = 2000;       // base grid cap — dense grids are key to high yield
+    const MAX_SEARCHES = 3000;    // total search budget across both phases
     const MAX_REFINE_DEPTH = 3;   // subdivide at most 3 levels (zoom +3)
-    const MIN_CELL_KM = 0.3;      // don't subdivide below ~300m cells
+    const MIN_CELL_KM = 0.2;      // don't subdivide below ~200m cells
+
+    // Boost the grid zoom above the user's display zoom. Higher zoom = smaller
+    // viewport per search = less overlap waste and more unique results per cell.
+    // Minimum zoom 16 ensures cells are small enough for urban density.
+    const gridZoom = Math.max(params.zoom + 1, 16);
 
     const bbox = boundingBoxFromCenter(params.lat, params.lon, params.radius);
-    const cellSize = cellSizeKmForZoom(params.lat, params.zoom);
+    const cellSize = cellSizeKmForZoom(params.lat, gridZoom);
     const baseCells = generateCellsCapped(bbox, cellSize, MAX_CELLS);
 
     log.info(
       `Adaptive grid search "${keyword}": ${baseCells.length} base cells ` +
-      `(cellSize ${cellSize.toFixed(2)}km, radius ${params.radius}m, zoom ${params.zoom})`
+      `(cellSize ${cellSize.toFixed(2)}km, radius ${params.radius}m, gridZoom ${gridZoom})`
     );
     this.emit("scrape:grid", {
       jobId: params.jobId,
@@ -484,6 +489,7 @@ export class ScraperEngine {
     const all: Entry[] = [];
     const request = page.context().request;
     let searches = 0;
+    let throttleCount = 0;
     const hotCells: SearchCell[] = [];
 
     const shouldStop = (): boolean =>
@@ -491,8 +497,12 @@ export class ScraperEngine {
       Date.now() > params.deadline ||
       searches >= MAX_SEARCHES;
 
-    const pace = (): Promise<void> =>
-      new Promise((resolve) => setTimeout(resolve, randomDelay(250, 700)));
+    // Adaptive pacing: base delay increases when Google throttles us.
+    const pace = (): Promise<void> => {
+      const baseMin = 300 + throttleCount * 200;
+      const baseMax = 800 + throttleCount * 400;
+      return new Promise((resolve) => setTimeout(resolve, randomDelay(baseMin, baseMax)));
+    };
 
     // Keep only businesses inside the user's circle (nearest first) and report.
     const record = (raw: Entry[]): void => {
@@ -510,18 +520,29 @@ export class ScraperEngine {
     };
 
     // ── Phase 1: breadth — cover every base cell once ────────────────────
+    let consecutiveEmpty = 0;
     for (let ci = 0; ci < baseCells.length; ci++) {
       if (shouldStop()) break;
       const cell = baseCells[ci]!;
 
       const raw = await this.searchCellRaw(
-        request, keyword, cell.lat, cell.lon, params.zoom, params.hl
+        request, keyword, cell.lat, cell.lon, gridZoom, params.hl
       );
       searches++;
+
+      // Throttle heuristic: in an urban area, 3+ consecutive empty cells
+      // likely means Google is suppressing results. Back off harder.
+      if (raw.length === 0) {
+        consecutiveEmpty++;
+        if (consecutiveEmpty >= 3) throttleCount = Math.min(throttleCount + 1, 10);
+      } else {
+        consecutiveEmpty = 0;
+      }
+
       if (raw.length >= MAX_RESULTS_PER_SEARCH) {
         // Saturated: Google truncated this cell, so there are more businesses
         // here than we saw. Queue it for refinement.
-        hotCells.push({ lat: cell.lat, lon: cell.lon, zoom: params.zoom, sizeKm: cellSize });
+        hotCells.push({ lat: cell.lat, lon: cell.lon, zoom: gridZoom, sizeKm: cellSize });
       }
       record(raw);
       log.info(

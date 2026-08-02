@@ -54,7 +54,7 @@ export const DEFAULT_FORM: ScrapeFormState = {
   depth: 10,
   email: false,
   fastMode: false,
-  maxTime: "10m",
+  maxTime: "15m",
   delay: 3,
   proxies: "",
   strategy: "standard",
@@ -141,15 +141,22 @@ export function ScrapeConfigPanel({ form, onChange, onSubmit, starting }: Scrape
   const radiusLabel =
     form.radius >= 1000 ? `${(form.radius / 1000).toFixed(1)} km` : `${form.radius} m`;
 
-  // Dynamic coverage estimate based on current settings.
+  // Grid-based coverage estimate — mirrors the engine's actual cell calculation.
   const keywordCount = form.keywords.split("\n").filter((k) => k.trim()).length || 1;
-  const maxTimeMin = parseInt(form.maxTime) || 10;
-  const strategyMultiplier =
-    form.strategy === "deep" ? 1.5 : form.strategy === "detailed" ? 1.2 : form.strategy === "quick" ? 0.4 : 1;
-  const radiusFactor = Math.min(form.radius / 10000, 3); // scales with area
-  const estLow = Math.round(800 * radiusFactor * strategyMultiplier * Math.min(maxTimeMin / 10, 4) * Math.sqrt(keywordCount));
-  const estHigh = Math.round(estLow * 2.2);
-  const coverageLabel = estHigh > 20000 ? `${(estLow / 1000).toFixed(0)}k–${(estHigh / 1000).toFixed(0)}k` : `${estLow.toLocaleString()}–${estHigh.toLocaleString()}`;
+  const latNum = parseFloat(form.lat) || 0;
+  const cosLat = Math.max(Math.abs(Math.cos((latNum * Math.PI) / 180)), 1e-6);
+  const metersPerPixel = (156543.03392 * cosLat) / Math.pow(2, form.zoom || 15);
+  const cellSizeKm = Math.max(0.3, (600 * metersPerPixel) / 1000 * 0.85);
+  const bboxLatSpan = (2 * form.radius) / 1000 / 111.32;
+  const bboxLonSpan = (2 * form.radius) / 1000 / (111.32 * cosLat);
+  const latStep = cellSizeKm / 111.32;
+  const lonStep = cellSizeKm / (111.32 * cosLat);
+  const gridCells = Math.max(1, Math.ceil(bboxLatSpan / latStep) * Math.ceil(bboxLonSpan / lonStep));
+  const totalSearches = Math.min(gridCells * keywordCount, 1200);
+  // Conservative yield: 2–10 unique leads per grid search after dedup & radius filter.
+  const estLow = Math.round(totalSearches * 2);
+  const estHigh = Math.round(totalSearches * 10);
+  const coverageLabel = estHigh > 20000 ? `~${(estLow / 1000).toFixed(0)}k–${(estHigh / 1000).toFixed(0)}k` : `~${estLow.toLocaleString()}–${estHigh.toLocaleString()}`;
 
   return (
     <form
@@ -421,8 +428,12 @@ export function ScrapeConfigPanel({ form, onChange, onSubmit, starting }: Scrape
 
       <div className="border-t p-3 space-y-2">
         <div className="flex items-center justify-between rounded-md bg-muted/50 px-2.5 py-1.5 text-[11px]">
-          <span className="text-muted-foreground">Est. coverage</span>
-          <span className="font-medium tabular-nums">{coverageLabel} leads</span>
+          <span className="text-muted-foreground">Grid searches</span>
+          <span className="font-medium tabular-nums">{totalSearches} cells</span>
+        </div>
+        <div className="flex items-center justify-between rounded-md bg-muted/50 px-2.5 py-1.5 text-[11px]">
+          <span className="text-muted-foreground">Est. leads (approx)</span>
+          <span className="font-medium tabular-nums">{coverageLabel}</span>
         </div>
         <Button type="submit" className="w-full" disabled={starting}>
           {starting ? (

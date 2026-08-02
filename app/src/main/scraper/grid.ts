@@ -59,13 +59,15 @@ export function boundingBoxFromCenter(lat: number, lon: number, radiusM: number)
 
 /**
  * Choose a grid cell size (km) so each cell is roughly the width of the search
- * viewport at the given zoom, scaled down a little so neighbouring cells
- * overlap and nothing falls through the cracks.
+ * viewport at the given zoom, scaled down significantly so neighbouring cells
+ * overlap heavily and no businesses fall through the cracks. The 0.6 factor
+ * means ~40% overlap between adjacent cells — critical for dense urban areas
+ * where Google's viewport-based ranking shifts results between searches.
  */
 export function cellSizeKmForZoom(lat: number, zoom: number): number {
   const metersPerPixel = (METERS_PER_PIXEL_ZOOM0 * Math.cos((lat * Math.PI) / 180)) / Math.pow(2, zoom);
   const viewportWidthKm = (VIEWPORT_W * metersPerPixel) / 1000;
-  return Math.max(0.3, viewportWidthKm * 0.85);
+  return Math.max(0.2, viewportWidthKm * 0.6);
 }
 
 /**
