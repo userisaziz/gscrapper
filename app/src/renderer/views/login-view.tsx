@@ -141,7 +141,7 @@ export function LoginView() {
         </Card>
 
         <p className="mt-4 text-center text-xs text-muted-foreground">
-          Active subscription required · v2.0.0
+          Active subscription required · v2.0.1
         </p>
       </div>
     </div>

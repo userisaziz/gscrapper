@@ -10,7 +10,7 @@ A cross-platform Electron app that scrapes Google Maps for business data using a
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)](https://github.com/userisaziz/gscrapper/releases)
 [![License](https://img.shields.io/badge/license-Private-lightgrey)](#)
 
-[Download](https://gscrapper.vercel.app) · [Features](#features) · [How It Works](#how-it-works) · [Lead Data](#what-you-get-per-lead) · [Getting Started](#getting-started)
+[Download](https://gscrapper.vercel.app) · [Features](#features) · [How It Works](#how-it-works) · [Lead Data](#what-you-get-per-lead) · [Getting Started](#getting-started) · [Installation Help](#installation-troubleshooting)
 
 </div>
 
@@ -177,6 +177,53 @@ Binaries are published as [GitHub Releases](https://github.com/userisaziz/gscrap
 | macOS Apple Silicon | `Google-Maps-Scraper-x.x.x-arm64.dmg` |
 | macOS Intel | `Google-Maps-Scraper-x.x.x.dmg` |
 | Linux x64 | `Google-Maps-Scraper-x.x.x.AppImage` |
+
+---
+
+## Installation Troubleshooting
+
+The app is not code-signed or notarized, so your operating system may show a security warning on first launch. This is normal for open-source apps distributed outside official app stores.
+
+### macOS — "Apple could not verify…"
+
+> "Apple could not verify 'Google Maps Scraper' is free of malware that may harm your Mac or compromise your privacy."
+
+1. Open the `.dmg` and drag the app to **Applications**.
+2. When the warning appears, click **Cancel** (do *not* move to Trash).
+3. Open **System Settings → Privacy & Security**.
+4. Scroll down — you'll see a message: *"Google Maps Scraper was blocked…"*. Click **"Open Anyway"**.
+5. Click **Open** in the confirmation dialog.
+
+The warning only appears once. Subsequent launches work normally.
+
+**Alternative (Terminal)** — after dragging the app to Applications:
+
+```bash
+xattr -cr /Applications/Google\ Maps\ Scraper.app
+```
+
+> If the app is still in Downloads: `xattr -cr ~/Downloads/Google\ Maps\ Scraper.app`
+
+### Windows — "Windows protected your PC"
+
+> "Microsoft Defender SmartScreen prevented an unrecognized app from starting."
+
+1. Run the `.exe` installer.
+2. When the SmartScreen dialog appears, click **"More info"**.
+3. Click **"Run anyway"** at the bottom of the dialog.
+4. Proceed with installation as normal.
+
+### Linux — AppImage won't launch
+
+1. Make the file executable:
+   ```bash
+   chmod +x Google-Maps-Scraper-*.AppImage
+   ```
+2. Run it:
+   ```bash
+   ./Google-Maps-Scraper-*.AppImage
+   ```
+3. If your file manager blocks it, right-click → **Properties** → **Permissions** → check **"Allow executing file as program"**.
 
 ---
 

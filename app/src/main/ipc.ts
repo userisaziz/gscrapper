@@ -306,7 +306,7 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
   });
 
   ipcMain.handle("app:info", () => {
-    return { version: "2.0.0", dataFolder: DATA_FOLDER };
+    return { version: "2.0.1", dataFolder: DATA_FOLDER };
   });
 }
 

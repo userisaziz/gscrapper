@@ -39,3 +39,5 @@ jobs:
         run: npm run build:${{ matrix.platform }} -- --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GMAPS_SUPABASE_URL: ${{ secrets.GMAPS_SUPABASE_URL }}
+          GMAPS_SUPABASE_ANON_KEY: ${{ secrets.GMAPS_SUPABASE_ANON_KEY }}

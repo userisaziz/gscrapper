@@ -215,7 +215,7 @@ export function SettingsView() {
           </Card>
 
           <p className="pb-2 text-center text-xs text-muted-foreground">
-            Maps Scraper Pro · v2.0.0
+            Maps Scraper Pro · v2.0.1
           </p>
         </div>
       </div>
