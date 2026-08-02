@@ -1,5 +1,9 @@
 appId: com.gosom.gmaps-scraper
 productName: Google Maps Scraper
+publish:
+  provider: github
+  owner: userisaziz
+  repo: gscrapper
 directories:
   output: release
   buildResources: build
