@@ -10,20 +10,45 @@ A cross-platform Electron app that scrapes Google Maps for business data using a
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)](https://github.com/userisaziz/gscrapper/releases)
 [![License](https://img.shields.io/badge/license-Private-lightgrey)](#)
 
-[Download](https://github.com/userisaziz/gscrapper/releases) · [Features](#features) · [Getting Started](#getting-started) · [Project Structure](#project-structure)
+[Download](https://gscrapper.vercel.app) · [Features](#features) · [How It Works](#how-it-works) · [Lead Data](#what-you-get-per-lead) · [Getting Started](#getting-started)
 
 </div>
 
 ---
 
-## What It Does
+<div align="center">
 
-Google Maps Scraper automates lead generation by searching Google Maps for businesses matching your keywords and location, then enriching each result with deep data extraction — all packaged in a clean desktop UI.
+![Google Maps Scraper UI](assets/screenshot.png)
 
-1. **Search** — Define keywords, a center location, and a search radius
-2. **Grid Scan** — The engine splits the area into an adaptive geographic grid to bypass Google's per-search result cap
-3. **Enrich** — Visits each business's website to extract emails, phones, social links, and descriptions
-4. **Export** — Streams results to CSV in real time as they're discovered
+</div>
+
+---
+
+## How It Works
+
+1. **Set your target** — Enter business keywords (e.g. "restaurants", "dentists"), pick a location on the interactive map, and set the search radius.
+2. **Choose a strategy** — Pick from Quick, Standard, Detailed, or Deep presets that control zoom level, scroll depth, and pacing. Optionally enable website enrichment and proxy rotation.
+3. **Start scraping** — The engine divides the area into an adaptive geographic grid, scanning each cell to bypass Google's ~100 results-per-search limit. Dense areas are automatically subdivided for full coverage.
+4. **Enrich leads** — With enrichment enabled, a real browser visits each business's website to extract emails, phone numbers, social media links, and descriptions.
+5. **Export to CSV** — Results stream to disk in real time as they're discovered. Open the CSV in Excel, Sheets, or your CRM.
+
+---
+
+## What You Get Per Lead
+
+Each scraped business includes 30+ data points:
+
+| Data | Details |
+|------|---------|
+| Business Info | Name, category, description, status, price range |
+| Contact | Phone, website, emails (from website), additional phones |
+| Location | Full address, lat/lng, plus code, timezone, street view URL |
+| Social & Web | Social media profiles, website description, key people |
+| Ratings | Overall rating, review count, per-rating breakdown, sub-ratings |
+| Reviews | Full review text, author, date, rating, images, owner replies |
+| Hours | Opening hours per day, popular times heatmap |
+| Media | Photos, thumbnails, menu links, reservation & ordering links |
+| Metadata | Google Maps link, place ID, CID, owner info, credits cards accepted |
 
 ---
 
@@ -127,7 +152,8 @@ npm run test:coverage # with coverage report
 │   │   ├── preload/           Context bridge
 │   │   └── renderer/          React UI (views, components, hooks)
 │   └── scripts/               Build helpers (browser bundling, config injection)
-├── website/                   Download landing page (GitHub Pages)
+├── website/                   Download landing page (Vercel + GitHub Pages)
+├── assets/                    README images
 └── .github/workflows/         CI/CD (deploy website on push to main)
 ```
 
@@ -135,7 +161,7 @@ npm run test:coverage # with coverage report
 
 ## Website
 
-Static download page with automatic OS detection. Deployed to GitHub Pages on push to `main`.
+Static download page with automatic OS detection. Live at [gscrapper.vercel.app](https://gscrapper.vercel.app) (also mirrored on GitHub Pages).
 
 No build step — open `website/index.html` locally to preview.
 
