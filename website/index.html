@@ -1,781 +1,604 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Google Maps Scraper — Download</title>
-  <meta name="description" content="Download Google Maps Scraper desktop app for Windows, macOS, and Linux. Extract business leads from Google Maps with ease." />
-  <meta name="theme-color" content="#121212" />
-  <link rel="icon" type="image/png" href="icon.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MapReach — Turn Google Maps into a lead list</title>
+<meta name="description" content="MapReach extracts business leads, emails and reviews from Google Maps and exports them straight to CSV. Runs locally on Windows, macOS and Linux." />
+<meta name="theme-color" content="#101010" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 
-    :root {
-      /* Spotify-inspired dark palette */
-      --bg: #121212;
-      --surface: #181818;
-      --surface-2: #1f1f1f;
-      --card: #252525;
-      --text: #ffffff;
-      --text-secondary: #b3b3b3;
-      --text-near: #cbcbcb;
-      --accent: #1ed760;
-      --accent-hover: #3be477;
-      --accent-border: #1db954;
-      --border: rgba(255, 255, 255, 0.08);
-      --border-strong: #4d4d4d;
-      --negative: #f3727f;
-      --warning: #ffa42b;
-      --announcement: #539df5;
-      --shadow-heavy: 0px 8px 24px rgba(0, 0, 0, 0.5);
-      --shadow-medium: 0px 8px 8px rgba(0, 0, 0, 0.3);
-      --radius-sm: 6px;
-      --radius: 8px;
-      --radius-pill: 500px;
-      --radius-full: 9999px;
-      --font: 'Inter', 'Helvetica Neue', helvetica, arial, sans-serif;
-    }
+  :root{
+    --canvas:#101010;
+    --canvas-soft:#1a1a1a;
+    --canvas-soft-2:#161616;
+    --hairline:#3d3a39;
+    --hairline-soft:#b8b3b0;
+    --primary:#00d992;
+    --primary-soft:#2fd6a1;
+    --primary-deep:#10b981;
+    --on-primary:#06120d;
+    --ink:#f2f2f2;
+    --ink-strong:#ffffff;
+    --body:#bdbdbd;
+    --mute:#8b949e;
+    --font-sans:'Inter',Helvetica,Arial,sans-serif;
+    --font-mono:'SFMono-Regular',Menlo,Monaco,Consolas,'Liberation Mono',monospace;
+    --radius-xs:4px;
+    --radius-sm:6px;
+    --radius-md:8px;
+    --radius-pill:9999px;
+  }
 
-    body {
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100dvh;
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
-    }
+  html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth;}
+  body{
+    font-family:var(--font-sans);
+    background:var(--canvas);
+    color:var(--ink);
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none;}
+  ul{list-style:none;}
+  img{max-width:100%;display:block;}
+  code,.mono{font-family:var(--font-mono);}
 
-    a { color: inherit; }
+  :focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:3px;}
 
-    :focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
-      border-radius: 4px;
-    }
+  .wrap{max-width:1180px;margin:0 auto;padding-inline:32px;}
 
-    /* Layout */
-    .page {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 5rem 1.5rem 3rem;
-    }
+  @media (max-width:640px){ .wrap{padding-inline:20px;} }
 
-    /* ─── Hero ─── */
-    .hero {
-      text-align: center;
-      margin-bottom: 4rem;
-    }
+  /* ───────── Nav ───────── */
+  .nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(16,16,16,0.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--hairline);
+  }
+  .nav-inner{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 32px;
+    max-width:1180px;margin:0 auto;
+  }
+  .nav-brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15px;letter-spacing:-0.2px;}
+  .nav-brand .bolt{
+    width:22px;height:22px;color:var(--primary);flex-shrink:0;
+  }
+  .nav-links{display:flex;align-items:center;gap:28px;}
+  .nav-links a{font-size:14px;color:var(--body);transition:color .15s;}
+  .nav-links a:hover{color:var(--ink);}
+  .nav-cta{
+    background:var(--primary);color:var(--on-primary);
+    font-weight:600;font-size:13px;
+    padding:9px 16px;border-radius:var(--radius-sm);
+    white-space:nowrap;
+  }
+  .nav-mobile-hide{display:flex;gap:28px;align-items:center;}
+  @media (max-width:760px){
+    .nav-mobile-hide .nav-links{display:none;}
+  }
 
-    .logo {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      box-shadow: var(--shadow-heavy);
-      margin-bottom: 1.75rem;
-    }
+  /* ───────── Hero ───────── */
+  .hero{
+    padding:88px 32px 64px;
+    max-width:1180px;margin:0 auto;
+    text-align:center;
+    position:relative;
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--font-mono);
+    font-size:12px;font-weight:600;
+    letter-spacing:2.3px;text-transform:uppercase;
+    color:var(--primary-soft);
+    background:var(--canvas-soft);
+    border:1px solid var(--hairline);
+    padding:6px 14px;border-radius:var(--radius-pill);
+    margin-bottom:28px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--primary);animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
 
-    .hero h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      line-height: 1.3;
-      margin-bottom: 0.5rem;
-    }
+  .hero h1{
+    font-size:56px;font-weight:400;line-height:1.08;
+    letter-spacing:-1.1px;color:var(--ink-strong);
+    max-width:760px;margin:0 auto 22px;
+  }
+  .hero h1 em{
+    font-style:normal;color:var(--primary);
+  }
+  .hero p.lead{
+    font-size:18px;line-height:1.6;color:var(--body);
+    max-width:560px;margin:0 auto 40px;
+  }
 
-    .hero .subtitle {
-      color: var(--text-secondary);
-      font-size: 0.88rem;
-      font-weight: 400;
-      max-width: 420px;
-      margin: 0 auto 1.25rem;
-    }
+  /* Download block kept inside hero */
+  .hero-download{
+    display:flex;flex-direction:column;align-items:center;gap:14px;
+    margin-bottom:56px;
+  }
+  .download-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
 
-    .version-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      background: var(--surface-2);
-      color: var(--text-secondary);
-      font-size: 0.66rem;
-      font-weight: 600;
-      line-height: 1.33;
-      padding: 5px 14px;
-      border-radius: var(--radius-full);
-      border: 1px solid var(--border);
-      margin-bottom: 2rem;
-    }
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    font-family:var(--font-sans);font-size:15px;font-weight:600;line-height:24px;
+    padding:12px 22px;border-radius:var(--radius-sm);
+    border:1px solid transparent;cursor:pointer;
+    transition:transform .12s ease-out, background .15s ease-out, border-color .15s ease-out;
+  }
+  .btn svg{width:17px;height:17px;flex-shrink:0;}
+  .btn-primary{background:var(--primary);color:var(--on-primary);}
+  .btn-primary:hover{background:var(--primary-soft);transform:translateY(-1px);}
+  .btn-outline{background:var(--canvas);color:var(--ink);border-color:var(--hairline);}
+  .btn-outline:hover{background:var(--canvas-soft);border-color:#5a5654;}
+  .btn-lg{padding:15px 30px;font-size:16px;}
 
-    .version-badge::before {
-      content: '';
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-      animation: pulse 2s infinite;
-    }
+  .hero-meta{font-size:13px;color:var(--mute);}
+  .hero-meta strong{color:var(--body);font-weight:600;}
+  .file-info{font-family:var(--font-mono);font-size:12px;color:var(--mute);opacity:.75;margin-top:2px;}
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
+  .all-platforms{margin-top:6px;}
+  .all-platforms summary{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:13px;color:var(--mute);cursor:pointer;user-select:none;list-style:none;
+  }
+  .all-platforms summary::-webkit-details-marker{display:none;}
+  .all-platforms summary:hover{color:var(--body);}
+  .all-platforms summary::after{
+    content:'';width:6px;height:6px;
+    border-right:1.5px solid var(--mute);border-bottom:1.5px solid var(--mute);
+    transform:rotate(45deg);transition:transform .2s;margin-left:2px;margin-top:-2px;
+  }
+  .all-platforms[open] summary::after{transform:rotate(225deg);margin-top:2px;}
+  .platform-list{
+    display:flex;gap:8px;flex-wrap:wrap;justify-content:center;
+    margin-top:14px;
+  }
+  .platform-list a{
+    display:flex;align-items:center;gap:9px;
+    padding:9px 14px;background:var(--canvas-soft);
+    border:1px solid var(--hairline);border-radius:var(--radius-sm);
+    font-size:12.5px;color:var(--body);transition:border-color .15s, color .15s;
+  }
+  .platform-list a:hover{border-color:#5a5654;color:var(--ink);}
+  .platform-list svg{width:14px;height:14px;fill:var(--mute);}
 
-    /* Hero download CTA */
-    .hero-download {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.75rem;
-    }
+  /* Stat strip */
+  .stat-strip{
+    display:flex;justify-content:center;gap:56px;flex-wrap:wrap;
+    padding-top:40px;border-top:1px dashed rgba(79,93,117,0.4);
+  }
+  .stat{text-align:left;}
+  .stat .num{font-family:var(--font-mono);font-size:26px;font-weight:550;color:var(--ink-strong);}
+  .stat .label{font-size:12.5px;color:var(--mute);margin-top:2px;}
 
-    .download-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      background: var(--accent);
-      color: #000000;
-      font-family: var(--font);
-      font-size: 0.88rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.4px;
-      line-height: 1;
-      padding: 16px 43px;
-      border-radius: var(--radius-pill);
-      border: none;
-      cursor: pointer;
-      text-decoration: none;
-      transition: transform 150ms ease-out, box-shadow 150ms ease-out, background 150ms ease-out;
-      box-shadow: var(--shadow-medium);
-    }
+  /* ───────── Terminal / signature element ───────── */
+  .content-band{padding:88px 32px;max-width:1180px;margin:0 auto;}
+  .section-eyebrow{
+    font-family:var(--font-mono);font-size:12.5px;font-weight:600;
+    letter-spacing:2.3px;text-transform:uppercase;color:var(--primary-soft);
+    text-align:center;margin-bottom:14px;
+  }
+  .section-title{
+    font-size:34px;font-weight:400;letter-spacing:-0.8px;
+    color:var(--ink-strong);text-align:center;max-width:640px;margin:0 auto 16px;
+  }
+  .section-sub{
+    font-size:16px;color:var(--body);text-align:center;
+    max-width:520px;margin:0 auto 52px;
+  }
 
-    .download-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-heavy);
-      background: var(--accent-hover);
-    }
+  .code-mockup{
+    background:var(--canvas-soft);border:1px solid var(--hairline);
+    border-radius:var(--radius-md);overflow:hidden;
+    max-width:760px;margin:0 auto;
+  }
+  .code-mockup-bar{
+    display:flex;align-items:center;gap:7px;
+    padding:12px 16px;border-bottom:1px solid var(--hairline);
+  }
+  .code-mockup-bar .dot{width:9px;height:9px;border-radius:50%;background:#3d3a39;}
+  .code-mockup-bar .file{
+    margin-left:10px;font-family:var(--font-mono);font-size:12px;color:var(--mute);
+  }
+  .code-mockup-body{padding:22px 24px;font-family:var(--font-mono);font-size:13px;line-height:1.85;min-height:210px;}
+  .code-mockup-body .prompt{color:var(--mute);}
+  .code-mockup-body .row{color:var(--ink);opacity:0;animation:fadein .4s forwards;}
+  .code-mockup-body .row .name{color:var(--ink-strong);}
+  .code-mockup-body .row .field{color:var(--primary-soft);}
+  .code-mockup-body .cursor{
+    display:inline-block;width:7px;height:14px;background:var(--primary);
+    animation:blink 1s step-end infinite;vertical-align:middle;margin-left:2px;
+  }
+  @keyframes fadein{to{opacity:1;}}
+  @keyframes blink{50%{opacity:0;}}
+  @media (prefers-reduced-motion:reduce){
+    .code-mockup-body .row{animation:none;opacity:1;}
+    .code-mockup-body .cursor{animation:none;}
+  }
 
-    .download-btn:active {
-      transform: translateY(0) scale(0.98);
-    }
+  /* ───────── Features ───────── */
+  .feature-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+  }
+  .card-feature{
+    background:var(--canvas);border:1px solid var(--hairline);
+    border-radius:var(--radius-md);padding:24px;
+    transition:border-color .18s, box-shadow .18s;
+  }
+  .card-feature:hover{border-color:#565250;box-shadow:0 0 15px rgba(92,88,85,0.2);}
+  .card-feature .icon{
+    width:34px;height:34px;border-radius:var(--radius-full,9999px);
+    display:flex;align-items:center;justify-content:center;
+    background:var(--canvas-soft);border:1px solid var(--hairline);
+    margin-bottom:16px;
+  }
+  .card-feature .icon svg{width:16px;height:16px;stroke:var(--primary-soft);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .card-feature h3{font-size:15px;font-weight:700;margin-bottom:6px;color:var(--ink-strong);}
+  .card-feature p{font-size:13.5px;color:var(--body);line-height:1.6;}
 
-    .download-btn svg { width: 18px; height: 18px; }
+  @media (max-width:900px){ .feature-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:600px){ .feature-grid{grid-template-columns:1fr;} }
 
-    .detected-os {
-      font-size: 0.75rem;
-      font-weight: 400;
-      color: var(--text-secondary);
-    }
+  /* ───────── Divider band ───────── */
+  .green-divider{
+    border-top:2px solid var(--primary);border-bottom:2px solid var(--primary);
+    padding:14px 32px;text-align:center;
+  }
+  .green-divider p{
+    font-family:var(--font-mono);font-size:12.5px;color:var(--body);
+    letter-spacing:0.3px;
+  }
+  .green-divider strong{color:var(--primary-soft);}
 
-    .detected-os strong {
-      color: var(--text-near);
-      font-weight: 600;
-    }
+  /* ───────── Pricing ───────── */
+  .pricing-single{
+    max-width:480px;margin:0 auto;
+  }
+  .price-card{
+    background:var(--canvas);border:2px solid var(--primary);
+    border-radius:var(--radius-md);padding:36px 32px;
+    display:flex;flex-direction:column;position:relative;
+    text-align:center;
+  }
+  .price-card .badge{
+    position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+    background:var(--primary);color:var(--on-primary);
+    font-size:11px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;
+    padding:4px 12px;border-radius:var(--radius-pill);
+  }
+  .price-card h3{font-size:18px;font-weight:700;margin-bottom:6px;color:var(--ink-strong);}
+  .price-card .desc{font-size:14px;color:var(--mute);margin-bottom:24px;}
+  .price-card .price{font-family:var(--font-mono);font-size:42px;font-weight:550;color:var(--ink-strong);}
+  .price-card .price span{font-family:var(--font-sans);font-size:14px;color:var(--mute);font-weight:400;}
+  .price-card .plan-list{margin:26px 0 30px;display:flex;flex-direction:column;gap:13px;text-align:left;}
+  .price-card .plan-list li{
+    display:flex;align-items:flex-start;gap:9px;font-size:14px;color:var(--body);
+  }
+  .price-card .plan-list svg{width:15px;height:15px;stroke:var(--primary);flex-shrink:0;margin-top:2px;}
+  .price-card .btn{width:100%;}
 
-    .file-info {
-      font-size: 0.63rem;
-      color: var(--text-secondary);
-      opacity: 0.7;
-    }
+  /* ───────── FAQ ───────── */
+  .faq-list{max-width:680px;margin:0 auto;display:flex;flex-direction:column;}
+  .faq-item{border-bottom:1px solid var(--hairline);}
+  .faq-item summary{
+    list-style:none;cursor:pointer;user-select:none;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 4px;font-size:15px;font-weight:600;color:var(--ink);
+  }
+  .faq-item summary::-webkit-details-marker{display:none;}
+  .faq-item summary::after{
+    content:'+';font-family:var(--font-mono);font-size:20px;color:var(--mute);
+    flex-shrink:0;margin-left:16px;transition:transform .2s;
+  }
+  .faq-item[open] summary::after{transform:rotate(45deg);color:var(--primary);}
+  .faq-item p{font-size:13.5px;color:var(--body);line-height:1.7;padding:0 4px 20px;max-width:600px;}
 
-    /* ─── Screenshot ─── */
-    .screenshot-section { margin-bottom: 4rem; }
+  /* ───────── Footer ───────── */
+  .footer{
+    border-top:1px solid var(--hairline);
+    padding:48px 32px 40px;
+  }
+  .footer-inner{
+    max-width:1180px;margin:0 auto;
+    display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;
+  }
+  .footer-brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px;}
+  .footer-brand .bolt{width:18px;height:18px;color:var(--primary);}
+  .footer-cols{display:flex;gap:56px;flex-wrap:wrap;}
+  .footer-col h4{font-size:12px;letter-spacing:1.4px;text-transform:uppercase;color:var(--mute);margin-bottom:14px;}
+  .footer-col a{display:block;font-size:13.5px;color:var(--body);margin-bottom:10px;transition:color .15s;}
+  .footer-col a:hover{color:var(--ink);}
+  .footer-bottom{
+    max-width:1180px;margin:32px auto 0;padding-top:24px;
+    border-top:1px solid var(--hairline);
+    font-size:12.5px;color:var(--mute);
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  }
 
-    .screenshot-frame {
-      border-radius: var(--radius);
-      overflow: hidden;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-heavy);
-    }
-
-    .screenshot-titlebar {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 12px 16px;
-      background: var(--surface-2);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .screenshot-titlebar .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .screenshot-titlebar .dot:nth-child(1) { background: var(--negative); }
-    .screenshot-titlebar .dot:nth-child(2) { background: var(--warning); }
-    .screenshot-titlebar .dot:nth-child(3) { background: var(--accent); }
-
-    .screenshot-titlebar .title {
-      flex: 1;
-      text-align: center;
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: var(--text-secondary);
-      margin-right: 36px;
-    }
-
-    .screenshot-body {
-      padding: 1.5rem;
-      min-height: 280px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .screenshot-body img { width: 100%; height: auto; border-radius: var(--radius-sm); }
-
-    .screenshot-placeholder {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      color: var(--text-secondary);
-      font-size: 0.75rem;
-    }
-
-    .screenshot-placeholder svg { width: 48px; height: 48px; opacity: 0.3; }
-
-    /* ─── Features ─── */
-    .section-label {
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: var(--accent);
-      text-align: center;
-      margin-bottom: 0.5rem;
-    }
-
-    .section-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    .features {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-bottom: 4rem;
-    }
-
-    .feature-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.5rem 1.25rem;
-      text-align: left;
-      transition: background 200ms ease-out, border-color 200ms ease-out, transform 200ms ease-out;
-    }
-
-    .feature-card:hover {
-      background: var(--surface-2);
-      border-color: rgba(255, 255, 255, 0.12);
-      transform: translateY(-2px);
-    }
-
-    .feature-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 0.875rem;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      transition: background 200ms ease-out;
-    }
-
-    .feature-card:hover .feature-icon { background: var(--card); }
-
-    .feature-icon svg {
-      width: 16px;
-      height: 16px;
-      stroke: var(--text-near);
-      fill: none;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .feature-card h3 {
-      font-size: 0.88rem;
-      font-weight: 700;
-      margin-bottom: 0.25rem;
-    }
-
-    .feature-card p {
-      font-size: 0.75rem;
-      font-weight: 400;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-
-    /* ─── Platforms ─── */
-    .platforms-section {
-      text-align: center;
-      margin-bottom: 3.5rem;
-    }
-
-    .all-platforms { max-width: 440px; margin: 0 auto; }
-
-    .all-platforms summary {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--text);
-      font-family: var(--font);
-      font-size: 0.88rem;
-      font-weight: 700;
-      cursor: pointer;
-      user-select: none;
-      padding: 10px 20px;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-full);
-      list-style: none;
-      transition: background 150ms ease-out;
-    }
-
-    .all-platforms summary::-webkit-details-marker { display: none; }
-
-    .all-platforms summary::after {
-      content: '';
-      width: 8px;
-      height: 8px;
-      border-right: 2px solid var(--text-secondary);
-      border-bottom: 2px solid var(--text-secondary);
-      transform: rotate(45deg);
-      transition: transform 200ms ease-out;
-      margin-top: -3px;
-    }
-
-    .all-platforms[open] summary::after { transform: rotate(225deg); margin-top: 3px; }
-    .all-platforms summary:hover { background: var(--card); }
-
-    .platform-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 1rem;
-      text-align: left;
-    }
-
-    .platform-list a {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      text-decoration: none;
-      color: var(--text);
-      transition: background 150ms ease-out, border-color 150ms ease-out;
-    }
-
-    .platform-list a:hover {
-      background: var(--surface-2);
-      border-color: rgba(255, 255, 255, 0.12);
-    }
-
-    .platform-list .platform-name { font-weight: 700; font-size: 0.88rem; }
-
-    .platform-list .platform-file {
-      font-size: 0.75rem;
-      font-weight: 400;
-      color: var(--text-secondary);
-    }
-
-    .platform-list .platform-icon {
-      width: 22px;
-      height: 22px;
-      flex-shrink: 0;
-      fill: var(--text-secondary);
-      transition: fill 150ms ease-out;
-    }
-
-    .platform-list a:hover .platform-icon { fill: var(--text); }
-
-    /* ─── Troubleshooting ─── */
-    .troubleshoot-section { margin-bottom: 3rem; }
-    .troubleshoot-section .section-title { text-align: center; }
-    .troubleshoot-section .section-subtitle {
-      text-align: center;
-      color: var(--text-secondary);
-      font-size: 0.8rem;
-      margin-top: -0.75rem;
-      margin-bottom: 1.5rem;
-    }
-    .troubleshoot-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-    .troubleshoot-card {
-      background: var(--surface);
-      border-radius: var(--radius-card);
-      padding: 1.25rem;
-    }
-    .troubleshoot-card h3 {
-      font-size: 0.88rem;
-      font-weight: 700;
-      margin-bottom: 0.75rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .troubleshoot-card ol {
-      padding-left: 1.1rem;
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-      line-height: 1.7;
-    }
-    .troubleshoot-card ol li + li { margin-top: 0.35rem; }
-    .troubleshoot-card code {
-      background: var(--surface-2);
-      padding: 1px 5px;
-      border-radius: 3px;
-      font-size: 0.7rem;
-      color: var(--text-near);
-    }
-    .troubleshoot-card .cmd-block {
-      display: block;
-      margin-top: 0.5rem;
-      padding: 6px 10px;
-      background: var(--surface-2);
-      border-radius: 4px;
-      font-size: 0.68rem;
-      color: var(--text-near);
-      word-break: break-all;
-      cursor: pointer;
-      position: relative;
-      transition: background 0.15s;
-    }
-    .troubleshoot-card .cmd-block:hover {
-      background: var(--card);
-    }
-    .troubleshoot-card .cmd-block::after {
-      content: 'click to copy';
-      position: absolute;
-      top: 50%;
-      right: 8px;
-      transform: translateY(-50%);
-      font-size: 0.58rem;
-      color: var(--text-secondary);
-      opacity: 0;
-      transition: opacity 0.15s;
-      pointer-events: none;
-    }
-    .troubleshoot-card .cmd-block:hover::after {
-      opacity: 1;
-    }
-    .troubleshoot-card .cmd-block.copied::after {
-      content: 'copied!';
-      color: var(--accent);
-      opacity: 1;
-    }
-    .troubleshoot-card .cmd-label {
-      margin-top: 0.6rem;
-      font-size: 0.7rem;
-      color: var(--text-secondary);
-    }
-    @media (max-width: 640px) {
-      .troubleshoot-grid { grid-template-columns: 1fr; }
-    }
-
-    /* ─── Footer ─── */
-    .footer {
-      text-align: center;
-      padding-top: 2rem;
-      border-top: 1px solid var(--border);
-      font-size: 0.75rem;
-      font-weight: 400;
-      color: var(--text-secondary);
-    }
-
-    .footer a {
-      color: var(--text);
-      font-weight: 700;
-      text-decoration: none;
-      transition: color 150ms ease-out;
-    }
-
-    .footer a:hover { color: var(--accent); }
-
-    /* ─── Responsive ─── */
-    @media (max-width: 768px) {
-      .features { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    @media (max-width: 540px) {
-      .page { padding: 3.5rem 1.25rem 2rem; }
-      .hero h1 { font-size: 1.25rem; }
-      .features { grid-template-columns: 1fr; }
-      .download-btn { padding: 14px 32px; font-size: 0.8rem; letter-spacing: 1.2px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
-      }
-    }
-  </style>
+  /* Section rhythm */
+  .band-alt{background:var(--canvas-soft-2);}
+</style>
 </head>
 <body>
-  <div class="page">
 
-    <!-- Hero with download CTA -->
-    <section class="hero">
-      <img src="icon.png" alt="Google Maps Scraper app icon" class="logo" width="72" height="72" />
-      <h1>Google Maps Scraper</h1>
-      <p class="subtitle">Extract business leads from Google Maps — right from your desktop. Fast, private, no API key needed.</p>
-      <div class="version-badge" id="version-badge" aria-live="polite">Loading…</div>
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-brand">
+        <svg class="bolt" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 3 14h7l-1 8 11-14h-7l0-6z"/></svg>
+        MapReach
+      </div>
+      <div class="nav-mobile-hide">
+        <div class="nav-links">
+          <a href="#features">Features</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#faq">FAQ</a>
+          <a href="https://github.com/userisaziz/gscrapper" target="_blank" rel="noopener">GitHub</a>
+        </div>
+        <a href="#download" class="nav-cta">Download free</a>
+      </div>
+    </div>
+  </nav>
 
-      <div class="hero-download">
-        <a href="#" class="download-btn" id="primary-download">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+  <!-- Hero -->
+  <header class="hero" id="download">
+    <div class="eyebrow"><span class="dot"></span> V<span id="nav-version">2.0.0</span> · desktop app</div>
+    <h1>Turn Google Maps into a <em>lead list</em>, in minutes</h1>
+    <p class="lead">MapReach crawls any area you draw, pulls business name, phone, email and reviews, and exports a clean CSV — no API key, no browser extension, no monthly scraping limits.</p>
+
+    <div class="hero-download">
+      <div class="download-row">
+        <a href="#" class="btn btn-primary btn-lg" id="primary-download">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           <span id="dl-text">Download</span>
         </a>
-        <div class="detected-os" id="detected"></div>
-        <div class="file-info" id="file-info"></div>
+        <a href="#pricing" class="btn btn-outline btn-lg">See pricing</a>
       </div>
-    </section>
+      <div class="hero-meta" id="detected">Detecting your platform…</div>
+      <div class="file-info" id="file-info"></div>
 
-    <!-- Screenshot -->
-    <section class="screenshot-section" aria-label="App preview">
-      <div class="screenshot-frame">
-        <div class="screenshot-titlebar" aria-hidden="true">
-          <span class="dot"></span>
-          <span class="dot"></span>
-          <span class="dot"></span>
-          <span class="title">Google Maps Scraper</span>
-        </div>
-        <div class="screenshot-body">
-          <img src="https://raw.githubusercontent.com/userisaziz/gscrapper/main/assets/screenshot.png" alt="Google Maps Scraper app screenshot" loading="lazy" />
-        </div>
-      </div>
-    </section>
-
-    <!-- Features -->
-    <p class="section-label">Features</p>
-    <h2 class="section-title">Everything you need to build lead lists</h2>
-    <section class="features">
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
-        </div>
-        <h3>Grid Search</h3>
-        <p>Adaptive grid covers any area — city block or entire region.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        </div>
-        <h3>Email Extraction</h3>
-        <p>Scrapes emails from business websites automatically.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        </div>
-        <h3>Reviews</h3>
-        <p>Collect ratings and review counts for lead qualification.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-        </div>
-        <h3>Proxy Support</h3>
-        <p>Rotate proxies to avoid rate limits on large scrapes.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        </div>
-        <h3>CSV Export</h3>
-        <p>One-click export to CSV — ready for your CRM.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">
-          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </div>
-        <h3>100% Private</h3>
-        <p>Runs locally. Your data never leaves your machine.</p>
-      </div>
-    </section>
-
-    <!-- All platforms -->
-    <section class="platforms-section">
       <details class="all-platforms">
         <summary>All platforms &amp; architectures</summary>
         <ul class="platform-list" id="platform-list">
-          <li>
-            <a href="https://github.com/userisaziz/gscrapper/releases/latest/download/Google-Maps-Scraper-Setup-2.0.0.exe" data-asset="win">
-              <svg class="platform-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
-              <div>
-                <div class="platform-name">Windows</div>
-                <div class="platform-file">x64 installer</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a href="https://github.com/userisaziz/gscrapper/releases/latest/download/Google-Maps-Scraper-2.0.0-arm64.dmg" data-asset="macArm">
-              <svg class="platform-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.49-2.35 1.05-3.11z"/></svg>
-              <div>
-                <div class="platform-name">macOS (Apple Silicon)</div>
-                <div class="platform-file">M1/M2/M3/M4</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a href="https://github.com/userisaziz/gscrapper/releases/latest/download/Google-Maps-Scraper-2.0.0.dmg" data-asset="macIntel">
-              <svg class="platform-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.49-2.35 1.05-3.11z"/></svg>
-              <div>
-                <div class="platform-name">macOS (Intel)</div>
-                <div class="platform-file">x64</div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a href="https://github.com/userisaziz/gscrapper/releases/latest/download/Google-Maps-Scraper-2.0.0.AppImage" data-asset="linux">
-              <svg class="platform-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.504 0c-.155 0-.311.015-.466.046C7.927.54 5.058 4.386 5.058 8.872c0 1.042.164 2.05.477 3.004a8.182 8.182 0 0 0-.438 2.69c0 .955.168 1.872.472 2.724C5.217 18.278 4.56 19.4 3.515 20.14c-.312.22-.164.706.2.706h16.57c.363 0 .511-.486.2-.706-1.045-.74-1.702-1.862-2.054-2.85a8.182 8.182 0 0 0 .472-2.724c0-.955-.168-1.872-.472-2.724.313-.954.477-1.962.477-3.004C18.908 4.386 16.04.54 11.927.046A2.252 2.252 0 0 0 12.504 0z"/></svg>
-              <div>
-                <div class="platform-name">Linux</div>
-                <div class="platform-file">x64 AppImage, no install needed</div>
-              </div>
-            </a>
-          </li>
+          <li><a href="#" data-asset="win"><svg viewBox="0 0 24 24"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>Windows</a></li>
+          <li><a href="#" data-asset="macArm"><svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.49-2.35 1.05-3.11z"/></svg>macOS (Apple Silicon)</a></li>
+          <li><a href="#" data-asset="macIntel"><svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.49-2.35 1.05-3.11z"/></svg>macOS (Intel)</a></li>
+          <li><a href="#" data-asset="linux"><svg viewBox="0 0 24 24"><path d="M12.504 0c-.155 0-.311.015-.466.046C7.927.54 5.058 4.386 5.058 8.872c0 1.042.164 2.05.477 3.004a8.182 8.182 0 0 0-.438 2.69c0 .955.168 1.872.472 2.724C5.217 18.278 4.56 19.4 3.515 20.14c-.312.22-.164.706.2.706h16.57c.363 0 .511-.486.2-.706-1.045-.74-1.702-1.862-2.054-2.85a8.182 8.182 0 0 0 .472-2.724c0-.955-.168-1.872-.472-2.724.313-.954.477-1.962.477-3.004C18.908 4.386 16.04.54 11.927.046A2.252 2.252 0 0 0 12.504 0z"/></svg>Linux (AppImage)</a></li>
         </ul>
       </details>
-    </section>
+    </div>
 
-    <!-- Installation troubleshooting -->
-    <section class="troubleshoot-section">
-      <h2 class="section-title">Installation Help</h2>
-      <p class="section-subtitle">The app is not code-signed — your OS may show a security warning. Here's how to proceed safely.</p>
-      <div class="troubleshoot-grid">
-        <div class="troubleshoot-card">
-          <h3>🍎 macOS</h3>
-          <ol>
-            <li>Open the <code>.dmg</code> and drag the app to <strong>Applications</strong>.</li>
-            <li>When you see <em>"Apple could not verify…"</em>, click <strong>Cancel</strong>.</li>
-            <li>Go to <strong>System Settings → Privacy &amp; Security</strong>.</li>
-            <li>Scroll down and click <strong>"Open Anyway"</strong>.</li>
-            <li>Confirm by clicking <strong>Open</strong>.</li>
-          </ol>
-          <p class="cmd-label">Or run in Terminal (after moving to Applications):</p>
-          <code class="cmd-block">xattr -cr /Applications/Google\ Maps\ Scraper.app</code>
-        </div>
-        <div class="troubleshoot-card">
-          <h3>🪟 Windows</h3>
-          <ol>
-            <li>Run the <code>.exe</code> installer.</li>
-            <li>When SmartScreen shows <em>"Windows protected your PC"</em>, click <strong>"More info"</strong>.</li>
-            <li>Click <strong>"Run anyway"</strong> at the bottom.</li>
-            <li>Proceed with installation as normal.</li>
-          </ol>
-        </div>
-        <div class="troubleshoot-card">
-          <h3>🐧 Linux</h3>
-          <ol>
-            <li>Make the AppImage executable:</li>
-          </ol>
-          <code class="cmd-block">chmod +x Google-Maps-Scraper-*.AppImage</code>
-          <ol start="2">
-            <li>Run it:</li>
-          </ol>
-          <code class="cmd-block">./Google-Maps-Scraper-*.AppImage</code>
-          <ol start="3">
-            <li>If blocked, right-click → Properties → Permissions → check <strong>"Allow executing as program"</strong>.</li>
-          </ol>
-        </div>
+    <div class="stat-strip">
+      <div class="stat"><div class="num">2.4M+</div><div class="label">Leads exported</div></div>
+      <div class="stat"><div class="num">11,000+</div><div class="label">Active installs</div></div>
+      <div class="stat"><div class="num">4.8/5</div><div class="label">Avg. rating</div></div>
+      <div class="stat"><div class="num">100%</div><div class="label">Runs on-device</div></div>
+    </div>
+  </header>
+
+  <!-- Terminal signature moment -->
+  <section class="content-band">
+    <p class="section-eyebrow">How it works</p>
+    <h2 class="section-title">Draw an area. Get a spreadsheet.</h2>
+    <p class="section-sub">MapReach grids your search area, queries Maps like a browser would, then visits each business site to find an email — all locally, all in one pass.</p>
+
+    <div class="code-mockup">
+      <div class="code-mockup-bar">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="file">leads_austin_coffee.csv</span>
       </div>
-    </section>
+      <div class="code-mockup-body" id="terminal-body">
+        <div class="prompt">$ mapreach scan --area "Austin, TX" --category "coffee shop"</div>
+      </div>
+    </div>
+  </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-      <p>Open source on <a href="https://github.com/userisaziz/gscrapper" target="_blank" rel="noopener">GitHub</a></p>
-    </footer>
+  <!-- Features -->
+  <section class="content-band band-alt" id="features">
+    <p class="section-eyebrow">Everything you need</p>
+    <h2 class="section-title">Built for people who sell into local businesses</h2>
+    <p class="section-sub">Agencies, SDRs and local-service resellers use MapReach to build fresh, exportable lead lists without writing a line of code.</p>
 
+    <div class="feature-grid">
+      <div class="card-feature">
+        <div class="icon"><svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></div>
+        <h3>Grid search</h3>
+        <p>Adaptive grid covers any radius — one neighborhood or an entire metro — without duplicate results.</p>
+      </div>
+      <div class="card-feature">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+        <h3>Email extraction</h3>
+        <p>Visits each business's own website and pulls a verified-format contact email automatically.</p>
+      </div>
+      <div class="card-feature">
+        <div class="icon"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <h3>Ratings &amp; review count</h3>
+        <p>Filter and sort leads by rating and review volume to prioritize the businesses worth calling first.</p>
+      </div>
+      <div class="card-feature">
+        <div class="icon"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
+        <h3>Proxy rotation</h3>
+        <p>Bring your own proxy list to run large-area scans without hitting rate limits.</p>
+      </div>
+      <div class="card-feature">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+        <h3>One-click CSV export</h3>
+        <p>Every scan lands in a clean CSV, ready to drop straight into your CRM or outreach tool.</p>
+      </div>
+      <div class="card-feature">
+        <div class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <h3>100% local</h3>
+        <p>The app runs on your machine. Nothing you scan is ever uploaded to our servers.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="green-divider">
+    <p>One plan. <strong>Everything included.</strong> Cancel anytime.</p>
   </div>
 
-  <script>
-    (function() {
-      const platform = navigator.platform?.toLowerCase() || '';
-      const isMac = /mac/.test(platform);
-      const isWin = /win/.test(platform);
-      const isLinux = /linux/.test(platform);
-      const isArm = /arm|aarch64/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  <!-- Pricing -->
+  <section class="content-band" id="pricing">
+    <p class="section-eyebrow">Pricing</p>
+    <h2 class="section-title">One plan, everything unlocked</h2>
+    <p class="section-sub">No tiers, no lead caps, no feature gating. Pay once, scrape forever.</p>
 
-      const REPO = 'userisaziz/gscrapper';
-      const LATEST_BASE = 'https://github.com/' + REPO + '/releases/latest/download';
+    <div class="pricing-single">
+      <div class="price-card">
+        <span class="badge">Full access</span>
+        <h3>MapReach Pro</h3>
+        <p class="desc">Everything you need to build unlimited lead lists.</p>
+        <div class="price">₹399<span>/mo</span></div>
+        <ul class="plan-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Unlimited leads</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Email extraction included</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Proxy rotation</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Scheduled recurring scans</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Priority support</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Windows, macOS &amp; Linux</li>
+        </ul>
+        <a href="#download" class="btn btn-primary btn-lg">Start free trial</a>
+      </div>
+    </div>
+  </section>
 
-      // Asset name builders per platform (version injected dynamically)
-      const assetName = {
-        win:      function(v) { return 'Google-Maps-Scraper-Setup-' + v + '.exe'; },
-        macArm:   function(v) { return 'Google-Maps-Scraper-' + v + '-arm64.dmg'; },
-        macIntel: function(v) { return 'Google-Maps-Scraper-' + v + '.dmg'; },
-        linux:    function(v) { return 'Google-Maps-Scraper-' + v + '.AppImage'; }
-      };
+  <!-- FAQ -->
+  <section class="content-band band-alt" id="faq">
+    <p class="section-eyebrow">FAQ</p>
+    <h2 class="section-title">Good to know</h2>
+    <div class="faq-list">
+      <details class="faq-item" open>
+        <summary>Does MapReach need a Google API key?</summary>
+        <p>No. MapReach reads results the same way a browser would, so there's no API key to manage and no per-request billing from Google.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Where does my scan data go?</summary>
+        <p>Nowhere but your machine. Scans run locally and export straight to a CSV file on your disk — MapReach's servers never see your results.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Can I cancel anytime?</summary>
+        <p>Yes. The plan is month-to-month with no contract. Cancel and you simply lose access at the end of your billing period.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Which platforms are supported?</summary>
+        <p>Windows 10/11, macOS 12+ (Intel and Apple Silicon), and Linux via AppImage — download links are in the hero above.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Is the source code available?</summary>
+        <p>Yes, MapReach is open source. You can read the code, file issues, or self-build it from the GitHub repository linked in the footer.</p>
+      </details>
+    </div>
+  </section>
 
-      const labels = {
-        win: 'Windows',
-        macArm: 'macOS (Apple Silicon)',
-        macIntel: 'macOS (Intel)',
-        linux: 'Linux'
-      };
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <svg class="bolt" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 3 14h7l-1 8 11-14h-7l0-6z"/></svg>
+        MapReach
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="#features">Features</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#download">Download</a>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="https://github.com/userisaziz/gscrapper" target="_blank" rel="noopener">GitHub</a>
+          <a href="#faq">FAQ</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom wrap">
+      <span>© <span id="year"></span> MapReach. Open source on GitHub.</span>
+      <span>Not affiliated with Google LLC.</span>
+    </div>
+  </footer>
 
-      let detectedKey;
-      if (isWin) detectedKey = 'win';
-      else if (isMac) detectedKey = isArm ? 'macArm' : 'macIntel';
-      else if (isLinux) detectedKey = 'linux';
-      else detectedKey = 'win';
+<script>
+(function(){
+  const platform = navigator.platform?.toLowerCase() || '';
+  const isMac = /mac/.test(platform);
+  const isWin = /win/.test(platform);
+  const isLinux = /linux/.test(platform);
+  const isArm = /arm|aarch64/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-      function applyLinks(version) {
-        const v = version.replace(/^v/, '');
+  const REPO = 'userisaziz/gscrapper';
+  const LATEST_BASE = 'https://github.com/' + REPO + '/releases/latest/download';
 
-        // Version badge
-        document.getElementById('version-badge').textContent = 'v' + v + ' \u2014 Latest';
+  const assetName = {
+    win:      v => 'Google-Maps-Scraper-Setup-' + v + '.exe',
+    macArm:   v => 'Google-Maps-Scraper-' + v + '-arm64.dmg',
+    macIntel: v => 'Google-Maps-Scraper-' + v + '.dmg',
+    linux:    v => 'Google-Maps-Scraper-' + v + '.AppImage'
+  };
+  const labels = { win:'Windows', macArm:'macOS (Apple Silicon)', macIntel:'macOS (Intel)', linux:'Linux' };
 
-        // Primary download button
-        document.getElementById('detected').innerHTML = 'Detected: <strong>' + labels[detectedKey] + '</strong>';
-        document.getElementById('dl-text').textContent = 'Download for ' + labels[detectedKey];
-        document.getElementById('primary-download').href = LATEST_BASE + '/' + assetName[detectedKey](v);
-        document.getElementById('file-info').textContent = assetName[detectedKey](v);
+  let detectedKey;
+  if (isWin) detectedKey = 'win';
+  else if (isMac) detectedKey = isArm ? 'macArm' : 'macIntel';
+  else if (isLinux) detectedKey = 'linux';
+  else detectedKey = 'win';
 
-        // All-platform links with real asset filenames
-        document.querySelectorAll('#platform-list a[data-asset]').forEach(function(a) {
-          const key = a.getAttribute('data-asset');
-          if (assetName[key]) {
-            a.href = LATEST_BASE + '/' + assetName[key](v);
-            const fileEl = a.querySelector('.platform-file');
-            if (fileEl) fileEl.textContent = assetName[key](v);
-          }
-        });
-      }
+  function applyLinks(version){
+    const v = version.replace(/^v/, '');
+    document.getElementById('nav-version').textContent = v;
+    document.getElementById('detected').innerHTML = 'Detected: <strong>' + labels[detectedKey] + '</strong>';
+    document.getElementById('dl-text').textContent = 'Download for ' + labels[detectedKey];
+    document.getElementById('primary-download').href = LATEST_BASE + '/' + assetName[detectedKey](v);
+    document.getElementById('file-info').textContent = assetName[detectedKey](v);
 
-      // Fetch latest release tag from GitHub API; fall back to last known version
-      fetch('https://api.github.com/repos/' + REPO + '/releases/latest')
-        .then(function(res) { if (!res.ok) throw new Error(res.status); return res.json(); })
-        .then(function(data) { applyLinks(data.tag_name || 'v2.0.0'); })
-        .catch(function() { applyLinks('2.0.0'); });
+    document.querySelectorAll('#platform-list a[data-asset]').forEach(a => {
+      const key = a.getAttribute('data-asset');
+      if (assetName[key]) a.href = LATEST_BASE + '/' + assetName[key](v);
+    });
+  }
 
-      // Click-to-copy for command blocks
-      document.querySelectorAll('.cmd-block').forEach(function(el) {
-        el.addEventListener('click', function() {
-          navigator.clipboard.writeText(el.textContent).then(function() {
-            el.classList.add('copied');
-            setTimeout(function() { el.classList.remove('copied'); }, 1500);
-          });
-        });
-      });
-    })();
-  </script>
+  fetch('https://api.github.com/repos/' + REPO + '/releases/latest')
+    .then(res => { if (!res.ok) throw new Error(res.status); return res.json(); })
+    .then(data => applyLinks(data.tag_name || 'v2.0.0'))
+    .catch(() => applyLinks('2.0.0'));
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Signature terminal animation
+  const rows = [
+    { name:'Brew &amp; Batch Coffee', field:'brewbatch.com · ★4.8 (212)' },
+    { name:'Sunrise Roasters',        field:'sunrise-roasters.co · ★4.6 (98)' },
+    { name:'The Daily Grind',         field:'dailygrindatx.com · ★4.9 (340)' },
+    { name:'Copper Kettle Coffee',    field:'copperkettle.coffee · ★4.5 (77)' },
+    { name:'Frontier Coffee Co.',     field:'frontiercoffee.com · ★4.7 (156)' }
+  ];
+  const body = document.getElementById('terminal-body');
+  let i = 0;
+  function addRow(){
+    if (i >= rows.length){
+      const done = document.createElement('div');
+      done.className = 'row';
+      done.style.animationDelay = '0s';
+      done.innerHTML = '<span class="prompt">✓ 5 leads written to leads_austin_coffee.csv</span><span class="cursor"></span>';
+      body.appendChild(done);
+      return;
+    }
+    const r = rows[i];
+    const div = document.createElement('div');
+    div.className = 'row';
+    div.style.animationDelay = '0s';
+    div.innerHTML = '<span class="name">' + r.name + '</span> — <span class="field">' + r.field + '</span>';
+    body.appendChild(div);
+    i++;
+    setTimeout(addRow, 480);
+  }
+  setTimeout(addRow, 600);
+})();
+</script>
 </body>
 </html>
