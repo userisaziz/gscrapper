@@ -3,7 +3,8 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import "leaflet/dist/leaflet.css";
-import { useCallback, useRef, useState } from "react";
+import { Grid } from "lucide-react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   Circle,
   MapContainer,
@@ -13,6 +14,7 @@ import {
   useMapEvents,
 } from "react-leaflet";
 import { toast } from "sonner";
+import { GridOverlay, computeGridCellCount } from "@/components/grid-overlay";
 import { LocationSearch } from "@/components/location-search";
 import {
   DEFAULT_FORM,
@@ -21,6 +23,7 @@ import {
 } from "@/components/scrape-config-panel";
 import { useJobs, useStartScrape } from "@/hooks/use-jobs";
 import type { View } from "@/lib/navigation";
+import { cn } from "@/lib/utils";
 
 // Fix Leaflet default marker icons under a bundler.
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -53,6 +56,7 @@ interface MapViewProps {
 
 export function MapView({ onNavigate }: MapViewProps) {
   const [form, setForm] = useState<ScrapeFormState>(DEFAULT_FORM);
+  const [showGrid, setShowGrid] = useState(true);
   const mapRef = useRef<L.Map | null>(null);
 
   const startScrape = useStartScrape();
@@ -61,6 +65,11 @@ export function MapView({ onNavigate }: MapViewProps) {
 
   const lat = parseFloat(form.lat) || 25.2048;
   const lon = parseFloat(form.lon) || 55.2708;
+
+  const gridCellCount = useMemo(
+    () => computeGridCellCount(lat, lon, form.radius, form.zoom),
+    [lat, lon, form.radius, form.zoom]
+  );
 
   const patch = useCallback(
     (p: Partial<ScrapeFormState>) => setForm((f) => ({ ...f, ...p })),
@@ -170,11 +179,39 @@ export function MapView({ onNavigate }: MapViewProps) {
             dashArray: "4 4",
           }}
         />
+        <GridOverlay
+          lat={lat}
+          lon={lon}
+          radius={form.radius}
+          zoom={form.zoom}
+          visible={showGrid}
+        />
       </MapContainer>
 
       {/* Location search — floating top center */}
       <div className="absolute left-1/2 top-4 z-[500] w-80 -translate-x-1/2">
         <LocationSearch onSelect={handleLocationSelect} />
+      </div>
+
+      {/* Grid toggle — floating top right */}
+      <div className="absolute right-4 top-4 z-[500] flex items-center gap-2">
+        <button
+          onClick={() => setShowGrid((v) => !v)}
+          className={cn(
+            "flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium shadow-md backdrop-blur-sm transition-colors",
+            showGrid
+              ? "border-green-500/40 bg-green-500/15 text-green-700 dark:text-green-400"
+              : "border-border bg-card/90 text-muted-foreground hover:bg-muted"
+          )}
+        >
+          <Grid className="h-3.5 w-3.5" />
+          Grid {showGrid ? "On" : "Off"}
+        </button>
+        {showGrid && (
+          <span className="rounded-md bg-card/90 px-2 py-1 text-[11px] font-medium tabular-nums text-muted-foreground shadow-sm backdrop-blur-sm">
+            {gridCellCount} cells
+          </span>
+        )}
       </div>
 
       {/* Scrape config — floating left */}

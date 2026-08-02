@@ -5,6 +5,7 @@ import {
   Loader2,
   LogOut,
   Moon,
+  RefreshCw,
   Sun,
   User,
 } from "lucide-react";
@@ -16,7 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { useLicense } from "@/hooks/use-license";
 import { useTheme } from "@/hooks/use-theme";
-import { api } from "@/lib/wails";
+import { api, onEvent } from "@/lib/wails";
 import type { SelectorStat } from "@/lib/wails";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +28,12 @@ export function SettingsView() {
   const [pwInstalled, setPwInstalled] = useState<boolean | null>(null);
   const [pwInstalling, setPwInstalling] = useState(false);
   const [selectorHealth, setSelectorHealth] = useState<SelectorStat[] | null>(null);
+  const [updateState, setUpdateState] = useState<
+    "idle" | "checking" | "available" | "downloading" | "downloaded" | "error"
+  >("idle");
+  const [updateVersion, setUpdateVersion] = useState("");
+  const [updateError, setUpdateError] = useState("");
+  const [downloadPercent, setDownloadPercent] = useState(0);
 
   useEffect(() => {
     api
@@ -37,6 +44,37 @@ export function SettingsView() {
       .getSelectorHealth()
       .then(setSelectorHealth)
       .catch(() => setSelectorHealth(null));
+
+    const unsub = onEvent("updater:status", (data: unknown) => {
+      const s = data as { status: string; version?: string; message?: string; percent?: number };
+      switch (s.status) {
+        case "checking":
+          setUpdateState("checking");
+          break;
+        case "available":
+          setUpdateState("available");
+          setUpdateVersion(s.version || "");
+          break;
+        case "not-available":
+          setUpdateState("idle");
+          toast.success("You're on the latest version");
+          break;
+        case "downloading":
+          setUpdateState("downloading");
+          setDownloadPercent(Math.round(s.percent || 0));
+          break;
+        case "downloaded":
+          setUpdateState("downloaded");
+          setUpdateVersion(s.version || "");
+          toast.success(`Update v${s.version} downloaded — click Install to apply`);
+          break;
+        case "error":
+          setUpdateState("error");
+          setUpdateError(s.message || "Unknown error");
+          break;
+      }
+    });
+    return unsub;
   }, []);
 
   const installPlaywright = async () => {
@@ -56,6 +94,29 @@ export function SettingsView() {
       await api.openDataFolder();
     } catch (err) {
       toast.error(`Failed to open data folder: ${err}`);
+    }
+  };
+
+  const handleCheckUpdate = async () => {
+    setUpdateState("checking");
+    setUpdateError("");
+    try {
+      const res = await api.checkForUpdate();
+      if (!res.triggered) {
+        setUpdateState("idle");
+        toast.info("Update checks are disabled in development mode");
+      }
+    } catch (err) {
+      setUpdateState("error");
+      setUpdateError(String(err));
+    }
+  };
+
+  const handleInstallUpdate = async () => {
+    try {
+      await api.installUpdate();
+    } catch (err) {
+      toast.error(`Failed to install update: ${err}`);
     }
   };
 
@@ -143,6 +204,52 @@ export function SettingsView() {
             </CardContent>
           </Card>
 
+          {/* Updates */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm">Software Updates</CardTitle>
+              <CardDescription className="text-xs">
+                v2.1.0 — check for new versions or install a downloaded update.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCheckUpdate}
+                  disabled={updateState === "checking" || updateState === "downloading"}
+                >
+                  {updateState === "checking" ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    <RefreshCw />
+                  )}
+                  {updateState === "checking" ? "Checking…" : "Check for Updates"}
+                </Button>
+                {updateState === "downloaded" && (
+                  <Button size="sm" onClick={handleInstallUpdate}>
+                    <Download />
+                    Install v{updateVersion}
+                  </Button>
+                )}
+              </div>
+              {updateState === "downloading" && (
+                <p className="text-xs text-muted-foreground">
+                  Downloading update… {downloadPercent}%
+                </p>
+              )}
+              {updateState === "available" && (
+                <p className="text-xs text-success">
+                  Update v{updateVersion} available — downloading automatically…
+                </p>
+              )}
+              {updateState === "error" && (
+                <p className="text-xs text-destructive">{updateError}</p>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Scraper Health */}
           <Card>
             <CardHeader className="pb-3">
@@ -215,7 +322,7 @@ export function SettingsView() {
           </Card>
 
           <p className="pb-2 text-center text-xs text-muted-foreground">
-            Maps Scraper Pro · v2.0.1
+            Maps Scraper Pro · v2.1.0
           </p>
         </div>
       </div>

@@ -11,6 +11,7 @@ import { JobStore } from "./store/jobs";
 import { ReviewStore } from "./store/reviews";
 import { ScrapeStartSchema, LoginSchema, JobIdSchema, parseDuration } from "./schemas";
 import { moduleLogger } from "./logger";
+import { checkForUpdateManual, quitAndInstall, setUpdateStatusCallback } from "./updater";
 
 const log = moduleLogger("ipc");
 
@@ -306,7 +307,20 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
   });
 
   ipcMain.handle("app:info", () => {
-    return { version: "2.0.1", dataFolder: DATA_FOLDER };
+    return { version: "2.1.0", dataFolder: DATA_FOLDER };
+  });
+
+  ipcMain.handle("app:checkUpdate", async () => {
+    return checkForUpdateManual();
+  });
+
+  ipcMain.handle("app:installUpdate", () => {
+    quitAndInstall();
+  });
+
+  // Forward updater status events to the renderer
+  setUpdateStatusCallback((status) => {
+    emit(getWindow(), "updater:status", status);
   });
 }
 

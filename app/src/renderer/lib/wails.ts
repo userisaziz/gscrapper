@@ -125,6 +125,8 @@ export const api = {
 
   openDataFolder: (): Promise<void> => callApi((a) => a.openDataFolder()),
   getAppInfo: (): Promise<Record<string, string>> => callApi((a) => a.getAppInfo()),
+  checkForUpdate: (): Promise<{ triggered: boolean }> => callApi((a) => a.checkForUpdate()),
+  installUpdate: (): Promise<void> => callApi((a) => a.installUpdate()),
 
   checkPlaywrightInstalled: (): Promise<boolean> => callApi((a) => a.checkPlaywrightInstalled()),
   installPlaywright: (): Promise<void> => callApi((a) => a.installPlaywright()),
@@ -148,7 +150,8 @@ export type WailsEvent =
   | "proxy:health"
   | "scrape:blocked"
   | "reviews:synced"
-  | "license:expired";
+  | "license:expired"
+  | "updater:status";
 
 /**
  * Subscribe to an Electron IPC event. Returns an unsubscribe function.

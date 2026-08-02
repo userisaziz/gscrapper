@@ -16,6 +16,8 @@ export interface ApiInterface {
   getAppInfo(): Promise<Record<string, string>>;
   getSelectorHealth(): Promise<any[]>;
   getReviewStats(placeRef?: string): Promise<any>;
+  checkForUpdate(): Promise<{ triggered: boolean }>;
+  installUpdate(): Promise<void>;
   onEvent(event: string, callback: (...args: any[]) => void): () => void;
 }
 
@@ -36,6 +38,8 @@ const api: ApiInterface = {
 
   openDataFolder: () => ipcRenderer.invoke("app:openDataFolder"),
   getAppInfo: () => ipcRenderer.invoke("app:info"),
+  checkForUpdate: () => ipcRenderer.invoke("app:checkUpdate"),
+  installUpdate: () => ipcRenderer.invoke("app:installUpdate"),
 
   getSelectorHealth: () => ipcRenderer.invoke("telemetry:stats"),
   getReviewStats: (placeRef) => ipcRenderer.invoke("reviews:stats", placeRef),
