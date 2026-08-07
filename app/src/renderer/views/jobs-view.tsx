@@ -31,6 +31,13 @@ function StatusBadge({ status }: { status: string }) {
   return <Badge variant={variant}>{status}</Badge>;
 }
 
+const FAILURE_REASONS: Record<string, string> = {
+  "all-empty": "Google blocked all requests — try again later or use a proxy",
+  "captcha": "CAPTCHA detected — cool down and retry with a proxy",
+  "html-block": "Google served a block page — rotate proxy or wait",
+  "browser-crash": "Browser crashed — check system resources",
+};
+
 export function JobsView({ onNavigate }: { onNavigate: (view: View) => void }) {
   const { data: jobs, isLoading, refetch, isFetching } = useJobs(true);
   const deleteJob = useDeleteJob();
@@ -120,6 +127,14 @@ export function JobsView({ onNavigate }: { onNavigate: (view: View) => void }) {
                       <TableCell>
                         <div className="flex items-center gap-1.5">
                           <StatusBadge status={job.status} />
+                          {job.status === "failed" && job.data?.failure_reason && (
+                            <span
+                              className="text-[10px] text-destructive/80"
+                              title={FAILURE_REASONS[job.data.failure_reason] || job.data.failure_reason}
+                            >
+                              {FAILURE_REASONS[job.data.failure_reason]?.split(" — ")[0] || job.data.failure_reason}
+                            </span>
+                          )}
                           {job.data?.monitor_reviews && (
                             <Badge
                               variant="secondary"

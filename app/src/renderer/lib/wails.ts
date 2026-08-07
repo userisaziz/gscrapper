@@ -33,6 +33,8 @@ export interface JobData {
   monitor_reviews?: boolean;
   reviews_after?: string;
   reviews_before?: string;
+  /** Reason the job failed (e.g. "all-empty", "captcha", "html-block"). */
+  failure_reason?: string;
 }
 
 export interface Job {

@@ -98,6 +98,7 @@ export class ScraperEngine {
 
     const csvPath = path.join(this.dataFolder, `${jobId}.csv`);
     let browser: Browser | null = null;
+    let failureReason: string | null = null;
 
     log.info(`Job ${jobId} starting: ${data.keywords?.length ?? 0} keywords`);
 
@@ -256,9 +257,19 @@ export class ScraperEngine {
       if (message.includes("Executable doesn't exist")) {
         message =
           "Playwright browsers are not installed. Open Settings → Playwright Browsers and click Install Now, then try again.";
+        failureReason = "browser-missing";
+      } else if (isBrowserCrash(err, browser)) {
+        failureReason = "browser-crash";
+      } else if (message.toLowerCase().includes("blocked all requests") || message.toLowerCase().includes("0 results")) {
+        failureReason = "all-empty";
+      } else if (message.toLowerCase().includes("block") || message.toLowerCase().includes("captcha")) {
+        failureReason = "captcha";
       }
       if (!abortController.signal.aborted) {
         log.error(`Job ${jobId} failed:`, message);
+        if (failureReason && this.jobStore) {
+          this.jobStore.updateData(jobId, { failure_reason: failureReason });
+        }
         this.emitStatus(jobId, "failed");
         this.emit("scrape:error", message);
       }
@@ -521,6 +532,9 @@ export class ScraperEngine {
 
     // ── Phase 1: breadth — cover every base cell once ────────────────────
     let consecutiveEmpty = 0;
+    let totalResults = 0;
+    const EARLY_ABORT_THRESHOLD = 5; // after this many cells, check for total failure
+
     for (let ci = 0; ci < baseCells.length; ci++) {
       if (shouldStop()) break;
       const cell = baseCells[ci]!;
@@ -529,6 +543,7 @@ export class ScraperEngine {
         request, keyword, cell.lat, cell.lon, gridZoom, params.hl
       );
       searches++;
+      totalResults += raw.length;
 
       // Throttle heuristic: in an urban area, 3+ consecutive empty cells
       // likely means Google is suppressing results. Back off harder.
@@ -537,6 +552,24 @@ export class ScraperEngine {
         if (consecutiveEmpty >= 3) throttleCount = Math.min(throttleCount + 1, 10);
       } else {
         consecutiveEmpty = 0;
+      }
+
+      // Early termination: if the first N cells ALL returned 0 results,
+      // Google is almost certainly blocking us. Stop immediately instead
+      // of burning 30 minutes on the remaining cells.
+      if (ci + 1 >= EARLY_ABORT_THRESHOLD && totalResults === 0) {
+        log.warn(
+          `Grid search "${keyword}" aborted: first ${EARLY_ABORT_THRESHOLD} cells ` +
+          `all returned 0 results — Google is likely blocking requests.`
+        );
+        this.emit("scrape:blocked", {
+          jobId: params.jobId,
+          keyword,
+          reason: "all-empty",
+          cellsChecked: ci + 1,
+        });
+        // Throw to fail the job with the "all-empty" reason
+        throw new Error("Google blocked all requests — first 5 cells returned 0 results");
       }
 
       if (raw.length >= MAX_RESULTS_PER_SEARCH) {
@@ -656,16 +689,24 @@ export class ScraperEngine {
         if (!response.ok()) return [];
         const body = await response.text();
 
-        // Block detection on the raw pb response: Google occasionally answers
-        // with a sorry-page body (HTTP 200) once it suspects automation.
-        // Cool down and retry like we do for 429/503.
-        if (body.includes("/sorry/") || body.toLowerCase().includes("unusual traffic")) {
-          this.emit("scrape:blocked", { keyword, reason: "captcha" });
+        // Block detection: Google serves HTML block pages (sorry, CAPTCHA,
+        // rate-limit) instead of the expected JSON response. Check for
+        // common block indicators.
+        const isHtml = body.trimStart().startsWith("<!DOCTYPE") || body.trimStart().startsWith("<html");
+        const hasBlockSignals =
+          body.includes("/sorry/") ||
+          body.toLowerCase().includes("unusual traffic") ||
+          body.toLowerCase().includes("captcha") ||
+          body.includes("google.com/recaptcha") ||
+          body.includes(" automated query");
+
+        if (isHtml || hasBlockSignals) {
+          this.emit("scrape:blocked", { keyword, reason: isHtml ? "html-block" : "captcha" });
           if (attempt < MAX_RETRIES) {
             await cooldown(blockCooldownMs());
             continue;
           }
-          log.warn(`Cell search still blocked after cooldown for "${keyword}"`);
+          log.warn(`Cell search blocked (${isHtml ? "HTML page" : "block signals"}) after cooldown for "${keyword}"`);
           return [];
         }
 

@@ -109,6 +109,16 @@ export class JobStore {
   }
 
   /**
+   * Update the job's data field (e.g. to record failure_reason).
+   */
+  updateData(id: string, data: Record<string, unknown>): void {
+    const existing = this.get(id);
+    if (!existing) return;
+    const merged = { ...existing.data, ...data };
+    this.db.prepare("UPDATE jobs SET data = ? WHERE id = ?").run(JSON.stringify(merged), id);
+  }
+
+  /**
    * Mark jobs left in a non-terminal state (pending/running) by a previous
    * session as failed. The scraper engine does not survive app restarts, so
    * such jobs will never complete and would otherwise show "pending" forever.
