@@ -1,5 +1,5 @@
 appId: com.gosom.gmaps-scraper
-productName: Google Maps Scraper
+productName: MapReach
 publish:
   provider: github
   owner: userisaziz
@@ -30,6 +30,10 @@ nsis:
 mac:
   target:
     - target: dmg
+      arch:
+        - x64
+        - arm64
+    - target: zip
       arch:
         - x64
         - arm64

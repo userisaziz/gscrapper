@@ -1,7 +1,7 @@
 {
   "name": "gmaps-scraper-desktop",
-  "version": "2.2.0",
-  "description": "Google Maps Scraper Desktop App",
+  "version": "2.3.0",
+  "description": "MapReach Desktop App",
   "main": "dist/main/index.js",
   "private": true,
   "scripts": {

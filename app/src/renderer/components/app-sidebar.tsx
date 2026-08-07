@@ -7,6 +7,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Settings,
+  Zap,
 } from "lucide-react";
 import { useState } from "react";
 import { LicenseBadge } from "@/components/license-badge";
@@ -47,11 +48,11 @@ export function AppSidebar({ active, onNavigate }: AppSidebarProps) {
       {/* Logo / brand */}
       <div className={cn("mac-drag-region flex items-center gap-2.5 px-3 py-4", collapsed && "justify-center px-0")}>
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <MapPin className="h-4.5 w-4.5" />
+          <Zap className="h-4.5 w-4.5" />
         </div>
         {!collapsed && (
           <div className="flex min-w-0 items-center gap-1.5">
-            <span className="truncate text-sm font-semibold">Maps Scraper</span>
+            <span className="truncate text-sm font-semibold">MapReach</span>
             <span className="rounded bg-primary px-1 py-px text-[9px] font-bold tracking-wider text-primary-foreground">
               PRO
             </span>

@@ -209,7 +209,7 @@ export function SettingsView() {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm">Software Updates</CardTitle>
               <CardDescription className="text-xs">
-                v2.1.0 — check for new versions or install a downloaded update.
+                v2.3.0 — check for new versions or install a downloaded update.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -322,7 +322,7 @@ export function SettingsView() {
           </Card>
 
           <p className="pb-2 text-center text-xs text-muted-foreground">
-            Maps Scraper Pro · v2.1.0
+            MapReach Pro · v2.3.0
           </p>
         </div>
       </div>

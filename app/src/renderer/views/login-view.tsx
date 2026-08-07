@@ -1,4 +1,4 @@
-import { AlertTriangle, Check, Loader2, MapPin } from "lucide-react";
+import { AlertTriangle, Check, Loader2, Zap } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -54,9 +54,9 @@ export function LoginView() {
             {/* Brand */}
             <div className="mb-6 flex flex-col items-center text-center">
               <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
-                <MapPin className="h-6 w-6" />
+                <Zap className="h-6 w-6" />
               </div>
-              <h1 className="text-xl font-bold tracking-tight">Maps Scraper Pro</h1>
+              <h1 className="text-xl font-bold tracking-tight">MapReach Pro</h1>
               <p className="mt-1 text-sm text-muted-foreground">
                 Sign in with your subscription credentials
               </p>

@@ -149,6 +149,7 @@ export type WailsEvent =
   | "scrape:error"
   | "scrape:progress"
   | "scrape:entry"
+  | "scrape:grid"
   | "proxy:health"
   | "scrape:blocked"
   | "reviews:synced"

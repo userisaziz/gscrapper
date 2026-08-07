@@ -1,7 +1,9 @@
-import { BrowserWindow, dialog, ipcMain, shell } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, shell } from "electron";
 import fs from "fs";
 import os from "os";
 import path from "path";
+import { execFile } from "child_process";
+import { promisify } from "util";
 import { BUILD_SUPABASE_URL, BUILD_SUPABASE_ANON_KEY } from "./build-config";
 import { LicenseManager } from "./license/manager";
 import { ScraperEngine } from "./scraper/engine";
@@ -12,6 +14,8 @@ import { ReviewStore } from "./store/reviews";
 import { ScrapeStartSchema, LoginSchema, JobIdSchema, parseDuration } from "./schemas";
 import { moduleLogger } from "./logger";
 import { checkForUpdateManual, quitAndInstall, setUpdateStatusCallback } from "./updater";
+
+const execFileAsync = promisify(execFile);
 
 const log = moduleLogger("ipc");
 
@@ -232,6 +236,8 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
 
   ipcMain.handle("scrape:results", (_e, id: string) => {
     if (!licensed) throw new Error("Active subscription required, please login");
+    const parsed = JobIdSchema.safeParse(id);
+    if (!parsed.success) throw new Error("Invalid job ID");
     const csvPath = path.join(DATA_FOLDER, `${id}.csv`);
     if (!fs.existsSync(csvPath)) throw new Error("No results found");
 
@@ -246,6 +252,8 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
 
   ipcMain.handle("scrape:export", async (_e, id: string) => {
     if (!licensed) throw new Error("Active subscription required, please login");
+    const parsed = JobIdSchema.safeParse(id);
+    if (!parsed.success) throw new Error("Invalid job ID");
     const win = getWindow();
     if (!win) return "";
 
@@ -279,8 +287,7 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
     const win = getWindow();
     emit(win, "playwright:installing", null);
     try {
-      const { execSync } = require("child_process");
-      execSync("npx playwright install chromium", { stdio: "pipe", timeout: 300000 });
+      await execFileAsync("npx", ["playwright", "install", "chromium"], { timeout: 300000 });
       emit(win, "playwright:installed", null);
       log.info("Playwright browsers installed");
     } catch (err: unknown) {
@@ -307,7 +314,7 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
   });
 
   ipcMain.handle("app:info", () => {
-    return { version: "2.1.0", dataFolder: DATA_FOLDER };
+    return { version: app.getVersion(), dataFolder: DATA_FOLDER };
   });
 
   ipcMain.handle("app:checkUpdate", async () => {
