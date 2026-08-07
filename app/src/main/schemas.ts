@@ -14,7 +14,7 @@ export const ScrapeStartSchema = z.object({
   lat: z.string().regex(/^-?\d+(\.\d+)?$/, "Invalid latitude").default("0"),
   lon: z.string().regex(/^-?\d+(\.\d+)?$/, "Invalid longitude").default("0"),
   depth: z.number().int().min(1).max(100).default(10),
-  email: z.boolean().default(false),
+  email: z.boolean().default(true),
   fast_mode: z.boolean().default(false),
   radius: z.number().min(100).max(500_000).default(10_000),
   max_time: z.string().regex(/^\d+(m|s|h)$/, "Format: <number><m|s|h>").default("15m"),

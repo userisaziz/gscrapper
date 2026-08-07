@@ -52,7 +52,7 @@ export const DEFAULT_FORM: ScrapeFormState = {
   radius: 10000,
   zoom: 15,
   depth: 10,
-  email: false,
+  email: true,
   fastMode: false,
   maxTime: "15m",
   delay: 3,

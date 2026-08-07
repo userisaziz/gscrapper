@@ -59,9 +59,12 @@ const SOCIAL_DOMAINS = [
 
 /** Path fragments that indicate a page likely contains contact info. */
 const CONTACT_PATH_HINTS = [
-  "contact", "contacto", "kontakt", "about", "about-us", "company",
+  "contact", "contacto", "kontakt", "contatto", "contato",
+  "about", "about-us", "company",
   "imprint", "impressum", "legal", "footer", "get-in-touch", "reach-us",
   "info", "support", "enquire", "inquiry",
+  "kontakta", "kontakte", "connexion", "contactez", "contattate",
+  "iletişim", "kontak", "contactenos",
 ];
 
 /** Path fragments that indicate a page likely lists team members. */
@@ -86,10 +89,15 @@ const TITLE_KEYWORDS = [
 /**
  * Scrape a lead's website using a Playwright page for full JS rendering.
  * Returns emails, phone numbers, social links, and a description.
+ *
+ * When `skipSubpages` is true only the homepage and contact-type pages are
+ * visited — people/team pages are skipped.  Useful for fast-mode where
+ * throughput matters more than exhaustive enrichment.
  */
 export async function scrapeWebsiteData(
   page: Page,
-  websiteUrl: string
+  websiteUrl: string,
+  options?: { skipSubpages?: boolean }
 ): Promise<WebsiteData> {
   const result: WebsiteData = {
     emails: [],
@@ -153,8 +161,9 @@ export async function scrapeWebsiteData(
     });
     if (!resp || resp.status() >= 400) return result;
 
-    // Give JS-rendered content a brief moment to appear
-    await page.waitForTimeout(1500);
+    // Give JS-rendered content time to appear — SPAs (React, Vue, Angular)
+    // often need 2–4 s to hydrate and inject emails into the DOM.
+    await page.waitForTimeout(3000);
 
     const extracted = await extractFromPage(page);
     addEmails(extracted.emails);
@@ -172,33 +181,38 @@ export async function scrapeWebsiteData(
     return result;
   }
 
-  // ── Crawl contact-type subpages ───────────────────────────────────────────
-  const subpages = contactLinks
-    .filter((l) => l.startsWith(origin))
-    .slice(0, MAX_SUBPAGES);
+  // ── Crawl contact-type subpages (always visited for emails) ───────────
+  // Contact pages are the #1 source of business emails, so we always crawl
+  // them regardless of skipSubpages.  Only people/team pages are skipped in
+  // fast mode.
+  {
+    const subpages = contactLinks
+      .filter((l) => l.startsWith(origin))
+      .slice(0, options?.skipSubpages ? 1 : MAX_SUBPAGES);
 
-  for (const subUrl of subpages) {
-    try {
-      await page.goto(subUrl, { waitUntil: "domcontentloaded", timeout: PAGE_TIMEOUT });
-      await page.waitForTimeout(1000);
-      const extracted = await extractFromPage(page);
-      addEmails(extracted.emails);
-      addPhones(extracted.phones);
-      addSocials(extracted.socials);
-      // Prefer a longer description if the subpage has one and homepage didn't
-      if (!result.description && extracted.description) {
-        result.description = extracted.description;
+    for (const subUrl of subpages) {
+      try {
+        await page.goto(subUrl, { waitUntil: "domcontentloaded", timeout: PAGE_TIMEOUT });
+        await page.waitForTimeout(1500);
+        const extracted = await extractFromPage(page);
+        addEmails(extracted.emails);
+        addPhones(extracted.phones);
+        addSocials(extracted.socials);
+        // Prefer a longer description if the subpage has one and homepage didn't
+        if (!result.description && extracted.description) {
+          result.description = extracted.description;
+        }
+      } catch {
+        // Subpage failed — not critical, keep what we have
       }
-    } catch {
-      // Subpage failed — not critical, keep what we have
-    }
 
-    // Early exit if we already found emails (most common goal)
-    if (result.emails.length >= 3) break;
+      // Early exit if we already found emails (most common goal)
+      if (result.emails.length >= 3) break;
+    }
   }
 
-  // ── Crawl people-type pages for decision-makers ─────────────────────
-  if (result.people.length < MAX_PEOPLE) {
+  // ── Crawl people-type pages for decision-makers (skipped in fast mode) ─
+  if (!options?.skipSubpages && result.people.length < MAX_PEOPLE) {
     const peoplePages = peopleLinks
       .filter((l) => l.startsWith(origin))
       .slice(0, MAX_PEOPLE_PAGES);
@@ -266,6 +280,16 @@ async function extractFromPage(page: Page): Promise<PageExtract> {
         const href = a.getAttribute("href") || "";
         const value = href.replace(/^mailto:/i, "").split("?")[0]?.trim() || "";
         if (value && value.includes("@")) emails.push(value.toLowerCase());
+      });
+
+      // ── Emails from data attributes (data-email, data-contact, etc.) ──
+      // Some themes/plugins store emails in data attributes to keep them
+      // out of plain text while still making them accessible to JS.
+      document.querySelectorAll("[data-email], [data-mail], [data-contact], [data-contact-email]").forEach((el) => {
+        for (const attr of ["data-email", "data-mail", "data-contact", "data-contact-email"]) {
+          const value = el.getAttribute(attr);
+          if (value && value.includes("@")) emails.push(value.trim().toLowerCase());
+        }
       });
 
       // ── Full rendered text (catches JS-rendered phones/emails) ──
