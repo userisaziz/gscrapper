@@ -18,7 +18,7 @@ A cross-platform Electron app that scrapes Google Maps for business data using a
 
 <div align="center">
 
-![Google Maps Scraper UI](assets/screenshot.png)
+![Google Maps Scraper UI](assets/screenshot_01.png)
 
 </div>
 
@@ -184,14 +184,17 @@ Binaries are published as [GitHub Releases](https://github.com/userisaziz/gscrap
 
 The app is not code-signed or notarized, so your operating system may show a security warning on first launch. This is normal for open-source apps distributed outside official app stores.
 
-### macOS — "Apple could not verify…"
+### macOS — "Apple could not verify…" / "MapReach is damaged"
 
-> "Apple could not verify 'Google Maps Scraper' is free of malware that may harm your Mac or compromise your privacy."
+> "Apple could not verify 'MapReach' is free of malware that may harm your Mac or compromise your privacy."
+> Or: "MapReach is damaged and can't be opened. You should move it to the Trash."
+
+Both messages mean the same thing — macOS Gatekeeper blocked the app because it isn't code-signed. Fix it by removing the quarantine attribute:
 
 1. Open the `.dmg` and drag the app to **Applications**.
 2. When the warning appears, click **Cancel** (do *not* move to Trash).
 3. Open **System Settings → Privacy & Security**.
-4. Scroll down — you'll see a message: *"Google Maps Scraper was blocked…"*. Click **"Open Anyway"**.
+4. Scroll down — you'll see a message: *"MapReach was blocked…"*. Click **"Open Anyway"**.
 5. Click **Open** in the confirmation dialog.
 
 The warning only appears once. Subsequent launches work normally.
@@ -199,10 +202,10 @@ The warning only appears once. Subsequent launches work normally.
 **Alternative (Terminal)** — after dragging the app to Applications:
 
 ```bash
-xattr -cr /Applications/Google\ Maps\ Scraper.app
+xattr -cr /Applications/MapReach.app
 ```
 
-> If the app is still in Downloads: `xattr -cr ~/Downloads/Google\ Maps\ Scraper.app`
+> If the app is still in Downloads: `xattr -cr ~/Downloads/MapReach.app`
 
 ### Windows — "Windows protected your PC"
 

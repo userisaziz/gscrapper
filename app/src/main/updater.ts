@@ -42,6 +42,11 @@ export function initAutoUpdater(): void {
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
 
+  // Skip code-signature validation for unsigned builds (macOS).
+  // Without this, electron-updater rejects updates because the .app bundle
+  // has no valid code signature.
+  autoUpdater.allowDowngrade = true;
+
   autoUpdater.on("checking-for-update", () => {
     log.info("Checking for updates…");
     emitStatus({ status: "checking" });
