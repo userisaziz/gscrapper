@@ -351,10 +351,10 @@ export class ScraperEngine {
             }
           }
 
-          // Website enrichment: emails, phones, socials, description —
-          // uses a real browser page so JS-rendered content is captured and
-          // bot-blocking sites see a genuine Chrome fingerprint.
-          if (!fastMode && extractEmail && entry.webSite && Date.now() <= deadline) {
+          // Website enrichment: always scrape the lead's website for emails,
+          // phones, socials, description, and people.  In fast mode we only
+          // visit the homepage (skipSubpages) to keep throughput high.
+          if (!fastMode && entry.webSite && Date.now() <= deadline) {
             const sitePage = await context.newPage();
             try {
               const siteData = await scrapeWebsiteData(sitePage, entry.webSite);
@@ -378,6 +378,21 @@ export class ScraperEngine {
               } catch {
                 entry.emails = [];
               }
+            }
+          } else if (fastMode && entry.webSite && Date.now() <= deadline) {
+            // Fast mode: homepage only — grab emails/phones without crawling
+            // contact or people subpages for maximum throughput.
+            const sitePage = await context.newPage();
+            try {
+              const siteData = await scrapeWebsiteData(sitePage, entry.webSite, { skipSubpages: true });
+              entry.emails = siteData.emails;
+              entry.websitePhones = siteData.phones;
+              entry.socials = siteData.socials;
+              entry.websiteDescription = siteData.description;
+            } catch {
+              entry.emails = [];
+            } finally {
+              await sitePage.close().catch(() => {});
             }
           }
 
